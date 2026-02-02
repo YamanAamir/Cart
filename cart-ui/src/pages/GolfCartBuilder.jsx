@@ -329,12 +329,12 @@ export default function GolfCartBuilder() {
               <p className="text-4xl lg:text-6xl font-serif tracking-tight">${totalPrice}</p>
             </div>
           </div>
-           <p
-                className="text-xs lg:text-sm tracking-tight mb-2 pt-10"
-                dangerouslySetInnerHTML={{
-                  __html: selections?.items?.Enclosure?.description || "No Description",
-                }}
-              />  
+          <p
+            className="text-xs lg:text-sm tracking-tight mb-2 pt-10"
+            dangerouslySetInnerHTML={{
+              __html: selections?.items?.Enclosure?.description || "No Description",
+            }}
+          />
         </div>
         {/* {console.log("selectedModel", selections.items.Enclosure?.description)} */}
         {/* Right - Options */}
