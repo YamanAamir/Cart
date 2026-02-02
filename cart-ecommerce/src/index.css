@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Trade Gothic Next LT Pro Cn";
+  src: url("/src/assets/fonts/Trade Gothic LT Std Condensed No. 18.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+*, body {
+  font-family: var(--font-sans);
+}
+
+@theme {
+  --font-sans: "Trade Gothic Next LT Pro Cn";
+
+  --color-primary: #0f172a;
+  --color-primary-light: #1e293b;
+  --color-secondary: #059669;
+  --color-accent: #d97706;
+  --color-neutral: #f8fafc;
+  
+  --color-gold: #d97706;
+  --color-navy: #0f172a;
+}
+
+@layer base {
+  body {
+    @apply bg-neutral text-primary font-sans antialiased;
+    overflow-x: hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans text-primary;
+  }
+}
+
+/* Animations */
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+.glass {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}

@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `Product` ADD COLUMN `heightCm` DECIMAL(8, 2) NOT NULL,
+    ADD COLUMN `lengthCm` DECIMAL(8, 2) NOT NULL,
+    ADD COLUMN `weightKg` DECIMAL(8, 2) NOT NULL,
+    ADD COLUMN `widthCm` DECIMAL(8, 2) NOT NULL;
+
