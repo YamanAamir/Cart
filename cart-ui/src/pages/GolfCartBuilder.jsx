@@ -38,6 +38,7 @@ export default function GolfCartBuilder() {
   const { brandSlug } = useParams();
   const [brand, setBrand] = useState(null);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
   const [groupedProducts, setGroupedProducts] = useState({});
   const [loading, setLoading] = useState(true);
   const [brandLogo, setBrandLogo] = useState(null);
@@ -168,29 +169,102 @@ export default function GolfCartBuilder() {
       ? (selections.items[category] || []).some((p) => p.id === product.id)
       : selections.items[category]?.id === product.id;
 
+  // const handleSelect = (category, product) => {
+  //   // setSelectedProduct(product)
+  //   if (isMultiSelectCategory(category)) {
+  //     setSelections((prev) => {
+  //       const current = prev.items[category] || [];
+  //       const exists = current.find((p) => p.id === product.id);
+  //       // Update selectedProduct only if adding
+  //       // setSelectedProduct(!exists ? product : null);
+  //       const updatedCategory = exists
+  //         ? current.filter((p) => p.id !== product.id) // remove
+  //         : [...current, product]; // add
+
+  //       // Update selectedProduct to last clicked item still in array
+  //       const lastSelectedProduct = updatedCategory.length
+  //         ? updatedCategory[updatedCategory.length - 1]
+  //         : null;
+  //       setSelectedProduct(lastSelectedProduct);
+
+  //       return {
+  //         ...prev,
+  //         items: {
+  //           ...prev.items,
+  //           [category]: exists
+  //             ? current.filter((p) => p.id !== product.id)
+  //             : [...current, product],
+  //         },
+  //       };
+  //     });
+  //   } else {
+  //     setSelections((prev) => {
+  //       const isSame = prev.items[category]?.id === product.id;
+  //       // If deselecting, clear selectedProduct
+  //       setSelectedProduct(isSame ? null : product);
+
+  //       return {
+  //         ...prev,
+  //         items: {
+  //           ...prev.items,
+  //           [category]: isSame ? null : product,
+  //         },
+  //       };
+  //     });
+  //     // setSelections((prev) => ({
+  //     //   ...prev,
+  //     //   items: {
+  //     //     ...prev.items,
+  //     //     [category]: prev.items[category]?.id === product.id ? null : product,
+  //     //   },
+  //     // }));
+  //   }
+  // };
+
   const handleSelect = (category, product) => {
     if (isMultiSelectCategory(category)) {
       setSelections((prev) => {
         const current = prev.items[category] || [];
         const exists = current.find((p) => p.id === product.id);
+
+        // Remove or add product
+        const updatedCategory = exists
+          ? current.filter((p) => p.id !== product.id)
+          : [...current, product];
+
+        // Update selectedProduct intelligently:
+        // - If added → set it as selectedProduct
+        // - If removed → set last item in updatedCategory or null if empty
+        const lastSelectedProduct = exists
+          ? updatedCategory[updatedCategory.length - 1] || null
+          : product;
+
+        setSelectedProduct(lastSelectedProduct);
+
         return {
           ...prev,
           items: {
             ...prev.items,
-            [category]: exists
-              ? current.filter((p) => p.id !== product.id)
-              : [...current, product],
+            [category]: updatedCategory,
           },
         };
       });
     } else {
-      setSelections((prev) => ({
-        ...prev,
-        items: {
-          ...prev.items,
-          [category]: prev.items[category]?.id === product.id ? null : product,
-        },
-      }));
+      setSelections((prev) => {
+        const isSame = prev.items[category]?.id === product.id;
+
+        // If deselecting → null, else → product
+        const selected = isSame ? null : product;
+        setSelectedProduct(selected);
+
+        return {
+          ...prev,
+          items: {
+            ...prev.items,
+            [category]: selected,
+          },
+        };
+      });
     }
   };
 
@@ -222,13 +296,12 @@ export default function GolfCartBuilder() {
       .reduce((sum, item) => sum + (item?.price || 0), 0)
   ).toFixed(2);
 
-  // const getSelectedProductDes =
-  //   selections?.items?.Enclosure?.description ?? "No Description";
-
-
   if (loading && !brand) {
     return <PageLoader />;
   }
+  console.log("selectedProduct", selectedProduct);
+  // console.log("selectedProduct", allImages);
+
 
   return (
     <div className="min-h-screen bg-white text-gray-800 font-sans pt-8 pb-20">
@@ -329,14 +402,10 @@ export default function GolfCartBuilder() {
               <p className="text-4xl lg:text-6xl font-serif tracking-tight">${totalPrice}</p>
             </div>
           </div>
-          <p
-            className="text-xs lg:text-sm tracking-tight mb-2 pt-10"
-            dangerouslySetInnerHTML={{
-              __html: selections?.items?.Enclosure?.description || "No Description",
-            }}
-          />
+          <p dangerouslySetInnerHTML={{ __html: selectedProduct?.description || "Description not found" }} className="text-xs lg:text-sm tracking-tight mb-2 pt-10" />
+
         </div>
-        {/* {console.log("selectedModel", selections.items.Enclosure?.description)} */}
+
         {/* Right - Options */}
         <div className="lg:w-[35%]">
           <div className="sticky top-24">
