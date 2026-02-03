@@ -536,7 +536,7 @@ export default function ProductDetails() {
             />
           ) : mainImage ? (
             <Image
-              src={`https://api.clubpromfg.com/uploads/products/${mainImage}`}
+              src={`http://localhost:5000/uploads/products/${mainImage}`}
               alt="Main product"
               fill
               className="object-cover"
@@ -554,7 +554,7 @@ export default function ProductDetails() {
           {["imageOne", "imageTwo", "imageThree", "imageFour"].map((field) => {
             const previewSrc = imagePreviews[field]?.startsWith("data:")
               ? imagePreviews[field]
-              : `https://api.clubpromfg.com/uploads/products/${imagePreviews[field]}`;
+              : `http://localhost:5000/uploads/products/${imagePreviews[field]}`;
 
             return (
               <div key={field} className="relative group">

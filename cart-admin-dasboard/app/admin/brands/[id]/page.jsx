@@ -180,7 +180,7 @@ export default function EditBrand() {
               {previewLogo ? (
                 <div className="relative inline-block">
                   <img
-                    src={previewLogo.includes('base64')?previewLogo:`https://api.clubpromfg.com${previewLogo}`}
+                    src={previewLogo.includes('base64')?previewLogo:`http://localhost:5000${previewLogo}`}
                     alt="Brand logo preview"
                     className="h-40 w-auto rounded-lg border object-contain bg-gray-50 shadow-sm"
                   />

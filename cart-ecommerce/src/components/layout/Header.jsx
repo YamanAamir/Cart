@@ -9,22 +9,27 @@ import TopBar from "./TopBar";
 export default function Header() {
   return (
     <>
-    <header className=" hidden md:block bg-white shadow-sm sticky top-0 z-50">
-    <TopBar />
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <Link to={"/"}><img src={logo} className="w-45 h-15" alt="" /></Link>
-          </div>
+      <header className=" hidden md:block bg-white shadow-sm sticky top-0 z-50">
+        <TopBar />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <Link to={"/"} className="flex flex-col justify-center items-center">
+                <img src={logo} className="w-42 h-12" alt="" />
+                <span className="text-xs mt-1 text-gray-700 text-center">
+                  Green Grass and Quick Shop
+                </span>
+              </Link>
+            </div>
 
-          {/* Search - visible on medium+ */}
-          <div className="hidden md:block flex-1 max-w-2xl mx-8">
-            <SearchBar />
-          </div>
+            {/* Search - visible on medium+ */}
+            <div className="hidden md:block flex-1 max-w-2xl mx-8">
+              <SearchBar />
+            </div>
 
-          {/* Right side */}
-          <div className="hidden lg:flex items-center gap-6">
+            {/* Right side */}
+            <div className="hidden lg:flex items-center gap-6">
               <div className="flex items-center gap-2">
                 <Phone size={20} className="text-[#f9c821]" />
                 <div className="text-sm">
@@ -33,10 +38,10 @@ export default function Header() {
                 </div>
               </div>
             </div>
+          </div>
         </div>
-      </div>
-      <MenuBar/>
-    </header>
+        <MenuBar />
+      </header>
     </>
   );
 }

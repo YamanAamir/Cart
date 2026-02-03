@@ -402,7 +402,53 @@ export default function GolfCartBuilder() {
               <p className="text-4xl lg:text-6xl font-serif tracking-tight">${totalPrice}</p>
             </div>
           </div>
-          <p dangerouslySetInnerHTML={{ __html: selectedProduct?.description || "Description not found" }} className="text-xs lg:text-sm tracking-tight mb-2 pt-10" />
+          <div className="pt-10">
+            <div className="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6 shadow-sm space-y-4">
+
+              {/* Header */}
+              <div className="flex items-center gap-2">
+                {/* <span className="h-1.5 w-1.5 rounded-full bg-primary" /> */}
+                <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
+                  Product Name
+                </h2>
+              </div>
+
+              {/* Product Name */}
+              {selectedProduct?.name ? (
+                <p
+                  className="text-base lg:text-lg font-medium text-gray-800"
+                  dangerouslySetInnerHTML={{ __html: selectedProduct.name }}
+                />
+              ) : (
+                <div className="h-4 w-40 rounded bg-gray-200 animate-pulse" />
+              )}
+
+              {/* Divider */}
+              <div className="h-px w-full bg-gray-100" />
+
+              <div className="flex items-center gap-2">
+                {/* <span className="h-1.5 w-1.5 rounded-full bg-primary" /> */}
+                <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
+                  Product Description
+                </h2>
+              </div>
+              {/* Description */}
+              {selectedProduct?.description ? (
+                <p
+                  className="text-sm lg:text-base text-gray-600 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: selectedProduct.description }}
+                />
+              ) : (
+                <div className="space-y-2">
+                  <div className="h-3 w-full rounded bg-gray-200 animate-pulse" />
+                  <div className="h-3 w-4/5 rounded bg-gray-200 animate-pulse" />
+                  <div className="h-3 w-3/5 rounded bg-gray-200 animate-pulse" />
+                </div>
+              )}
+
+            </div>
+          </div>
+
 
         </div>
 

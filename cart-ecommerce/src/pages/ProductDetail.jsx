@@ -49,39 +49,39 @@ export default function ProductDetail() {
   }
 
 
-//   const getCart = () => {
-//   try {
-//     return JSON.parse(localStorage.getItem("cart")) || [];
-//   } catch {
-//     return [];
-//   }
-// };
+  //   const getCart = () => {
+  //   try {
+  //     return JSON.parse(localStorage.getItem("cart")) || [];
+  //   } catch {
+  //     return [];
+  //   }
+  // };
 
-// const saveCart = (cart) => {
-//   localStorage.setItem("cart", JSON.stringify(cart));
-// };
-// const handleAddToCart = () => {
-//   const cart = getCart();
+  // const saveCart = (cart) => {
+  //   localStorage.setItem("cart", JSON.stringify(cart));
+  // };
+  // const handleAddToCart = () => {
+  //   const cart = getCart();
 
-//   const existingItem = cart.find((item) => item.id === product.id);
+  //   const existingItem = cart.find((item) => item.id === product.id);
 
-//   if (existingItem) {
-//     existingItem.quantity += quantity;
-//   } else {
-//     cart.push({
-//       id: product.id,
-//       name: product.name,
-//       price: product.salePrice,
-//       image: product.imageOne,
-//       brand: product.brand?.name,
-//       model: product.model?.name,
-//       quantity,
-//     });
-//   }
+  //   if (existingItem) {
+  //     existingItem.quantity += quantity;
+  //   } else {
+  //     cart.push({
+  //       id: product.id,
+  //       name: product.name,
+  //       price: product.salePrice,
+  //       image: product.imageOne,
+  //       brand: product.brand?.name,
+  //       model: product.model?.name,
+  //       quantity,
+  //     });
+  //   }
 
-//   saveCart(cart);
+  //   saveCart(cart);
 
-// };
+  // };
 
   const images = [
     product.imageOne,
@@ -118,7 +118,7 @@ export default function ProductDetail() {
               <img
                 src={`https://api.clubpromfg.com/uploads/products/${images[activeImage]}`}
                 alt={product.name}
-                className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-fill transition-all duration-300"
+                className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-cover transition-all duration-300"
               />
 
               {/* Prev */}
@@ -157,11 +157,10 @@ export default function ProductDetail() {
                   <button
                     key={index}
                     onClick={() => setActiveImage(index)}
-                    className={`border-2 rounded-lg overflow-hidden w-20 h-20 ${
-                      activeImage === index
+                    className={`border-2 rounded-lg overflow-hidden w-20 h-20 ${activeImage === index
                         ? "border-[#f9c821]"
                         : "border-transparent"
-                    }`}
+                      }`}
                   >
                     <img
                       src={`https://api.clubpromfg.com/uploads/products/${img}`}
@@ -196,10 +195,10 @@ export default function ProductDetail() {
               <span className="font-medium">Club Pro</span>
             </p>
 
-           <div
-  className="text-gray-600 mb-6 space-y-2"
-  dangerouslySetInnerHTML={{ __html: product.description }}
-/>
+            <div
+              className="text-gray-600 mb-6 space-y-2"
+              dangerouslySetInnerHTML={{ __html: product.description }}
+            />
 
 
             {/* Price - assuming you have salePrice / regularPrice */}
@@ -238,10 +237,10 @@ export default function ProductDetail() {
 
                 <button
                   onClick={() => {
-                    
+
                     setQuantity((q) => q + 1)
-                    
-                  
+
+
                   }}
                   className="px-4 py-2 text-lg hover:bg-gray-100"
                 >
@@ -253,28 +252,27 @@ export default function ProductDetail() {
             {/* Add to Cart */}
             <button
               onClick={() => {
-                  const priceToUse = product.salePrice && parseFloat(product.salePrice) > 0 
-                    ? parseFloat(product.salePrice) 
-                    : parseFloat(product.regularPrice || 0);
+                const priceToUse = product.salePrice && parseFloat(product.salePrice) > 0
+                  ? parseFloat(product.salePrice)
+                  : parseFloat(product.regularPrice || 0);
 
-                  setAdded(true);
-                  setTimeout(() => setAdded(false), 1800);
+                setAdded(true);
+                setTimeout(() => setAdded(false), 1800);
 
-                  addToCart({
-                    id: product.id,
-                    name: product.name,
-                    price: priceToUse,
-                    image: `https://api.clubpromfg.com/uploads/products/${images[0]}`,
-                    quantity:quantity
-                    
-                  })
-                }
-                }
-              className={`w-full py-5 text-xl font-bold rounded-xl transition shadow-lg ${
-                added
+                addToCart({
+                  id: product.id,
+                  name: product.name,
+                  price: priceToUse,
+                  image: `https://api.clubpromfg.com/uploads/products/${images[0]}`,
+                  quantity: quantity
+
+                })
+              }
+              }
+              className={`w-full py-5 text-xl font-bold rounded-xl transition shadow-lg ${added
                   ? "bg-green-500 text-white"
                   : "bg-[#f9c821] hover:bg-yellow-500 text-white"
-              }`}
+                }`}
             >
               {added ? "Added to Cart ✓" : "Add to Cart"}
             </button>
@@ -286,7 +284,7 @@ export default function ProductDetail() {
               <p className="mt-1">Product Type: {product.productType.name}</p>
 
               {/* Share icons - you can use react-icons or SVGs */}
-             
+
             </div>
           </div>
         </div>

@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-    domains: [
-      "api.clubpromfg.com"
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "api.clubpromfg.com",
+      }
     ],
   },
 };

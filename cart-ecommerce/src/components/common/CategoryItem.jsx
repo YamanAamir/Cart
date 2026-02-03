@@ -109,7 +109,7 @@ export default function CategoryItem({
           <img
             src={logo}
             alt={name}
-            className="w-11 h-11 object-contain p-1.5"
+            className="w-16 h-11 object-contain p-1.5"
           />
         ) : Icon ? (
           <Icon className="w-9 h-9 text-amber-600" />

@@ -281,19 +281,19 @@ const { brandName, modelId } = useParams();
                     className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition border border-gray-200 group"
                   >
                     {/* Square image only */}
-                    <div className="relative w-full aspect-square bg-gray-100 overflow-hidden">
+                    <div className="relative w-full aspect-square bggray-100 overflow-hidden">
                       <img
                         src={`https://api.clubpromfg.com/uploads/products/${
                           product.imageOne || "placeholder.jpg"
                         }`}
                         alt={product.name}
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="absolute inset-0 w-full h54 object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
                       />
                     </div>
 
                     <div className="p-3 sm:p-4">
-                      <h3 className="font-medium text-gray-900 line-clamp-2 mb-1 group-hover:text-amber-700 text-sm sm:text-base">
+                      <h3 className="font-medium text-gray-900 line-clamp-2 md:min-h-[3rem] mb-1 group-hover:text-amber-700 text-sm sm:text-base">
                         {product.name}
                       </h3>
                       <div className="text-xs sm:text-sm text-gray-600 mb-2">
