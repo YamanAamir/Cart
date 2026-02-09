@@ -43,8 +43,8 @@ const CheckoutPage = () => {
     };
 
     const response = await fetch(
-      // 'http://localhost:5000/api/checkout/stripe-session',
-      'http://localhost:5000//api/checkout/stripe-session',
+      // 'https://api.clubpromfg.com/api/checkout/stripe-session',
+      'https://api.clubpromfg.com//api/checkout/stripe-session',
       {
         method: 'POST',
         headers: {
