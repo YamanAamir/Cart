@@ -8,10 +8,14 @@ export default function CategoryItem({
   onClick,
   models = [],
   variant = "sidebar",
+  brandSlug,
 }) {
   const hasModels = models?.length > 0;
-  const brandUrl = `/shop/${encodeURIComponent(name)}`;
+  // const brandUrl =  `/shop/${encodeURIComponent(name)}`;
 
+  const brandUrl = brandSlug
+    ? brandSlug
+    : `/shop/${encodeURIComponent(name)}`;
   const content = (
     <>
       <span className="font-medium text-gray-800 text-[15px] truncate flex-1">

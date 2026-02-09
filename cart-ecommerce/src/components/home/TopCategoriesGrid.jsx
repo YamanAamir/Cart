@@ -81,7 +81,7 @@ export default function TopCategoriesGrid() {
               >
                 <CategoryItem
                   name={brand.name}
-                  logo={`https://api.clubpromfg.com/${brand.logo}`}
+                  logo={`https://api.clubpromfg.com${brand.logo}`}
                   models={brand.models || []}
                   variant="grid"
                 />
