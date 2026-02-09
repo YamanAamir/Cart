@@ -151,8 +151,8 @@ export default function ShopCategory() {
                   <div key={brand.id}>
                     <div
                       className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected
-                          ? "bg-amber-50 text-[#f9c821] font-medium"
-                          : "hover:bg-gray-50 text-gray-700"
+                        ? "bg-amber-50 text-[#f9c821] font-medium"
+                        : "hover:bg-gray-50 text-gray-700"
                         }`}
                     >
                       {/* Brand name → navigate */}
@@ -189,8 +189,8 @@ export default function ShopCategory() {
                     {brand.models?.length > 0 && (
                       <div
                         className={`overflow-hidden transition-all duration-200 ${isSelected
-                            ? "max-h-96 opacity-100"
-                            : "max-h-0 opacity-0"
+                          ? "max-h-96 opacity-100"
+                          : "max-h-0 opacity-0"
                           }`}
                       >
                         <ul className="mt-1 ml-4 pl-3 border-l-2 border-amber-200 space-y-1">
@@ -292,8 +292,7 @@ export default function ShopCategory() {
                         {product.name}
                       </h3>
                       <div className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {product.brand?.name} • {product.model?.name} • {product?.color || "N/A"}
-                        {/* <p>Color: {product?.color || "N/A"}</p> */}
+                        {product.brand?.name} • {product.model?.name}  {product?.color ? `• ${product.color}` : ""}
                       </div>
                       <div className="flex items-baseline gap-3">
                         <span className="text-xl sm:text-2xl font-bold text-amber-700">
@@ -366,8 +365,8 @@ export default function ShopCategory() {
                   setCurrentPage(1);
                 }}
                 className={`w-full text-left px-4 py-3 rounded-lg ${!selectedBrand
-                    ? "bg-amber-50 text-amber-800 font-medium"
-                    : "hover:bg-gray-50"
+                  ? "bg-amber-50 text-amber-800 font-medium"
+                  : "hover:bg-gray-50"
                   }`}
               >
                 All Brands
@@ -384,8 +383,8 @@ export default function ShopCategory() {
                     setCurrentPage(1);
                   }}
                   className={`w-full text-left px-4 py-3 rounded-lg ${selectedBrand === brand.name
-                      ? "bg-amber-50 text-amber-800 font-medium"
-                      : "hover:bg-gray-50"
+                    ? "bg-amber-50 text-amber-800 font-medium"
+                    : "hover:bg-gray-50"
                     }`}
                 >
                   {brand.name}
