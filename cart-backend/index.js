@@ -34,6 +34,8 @@ const orderRoutes = require("./src/routes/orderRoutes");
 const profileRoutes = require("./src/routes/profileRoutes");
 const contactRoutes = require("./src/routes/contactRoutes");
 // const checkoutRoutes = require("./src/routes/checkoutRoutes");
+const warrantyRoutes = require("./src/routes/warrantyRoutes");
+const statsRoutes = require("./src/routes/statsRoutes");
 
 
 
@@ -99,10 +101,13 @@ app.use("/api", productTypeRoutes);
 app.use("/api", customerRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", contactRoutes);
+app.use("/api", statsRoutes);
 // app.use("/api", checkoutRoutes);
 
 
 app.use("/api", orderRoutes);
+app.use("/api", warrantyRoutes);
+
 
 
 

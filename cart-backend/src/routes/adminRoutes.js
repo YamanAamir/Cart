@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { check } = require('express-validator');
-const { getAdminProfile, updateAdminProfile, deleteProfilePicture } = require('../controllers/adminController');
+const { getAdminProfile, updateAdminProfile, deleteProfilePicture, getRegisteredWarranties, getRegisteredWarrantyById } = require('../controllers/adminController');
 const { authenticateToken } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
 const fixUploadPath = require('../middlewares/fixUploadPath');
@@ -32,5 +32,8 @@ router.put(
 );
 
 router.delete('/admin/profile/picture', authenticateToken, deleteProfilePicture);
+router.get('/registered-warranties', authenticateToken, getRegisteredWarranties);
+router.get('/registered-warranties/:id/show', authenticateToken, getRegisteredWarrantyById);
+
 
 module.exports = router;

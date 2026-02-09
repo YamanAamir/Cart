@@ -33,6 +33,75 @@ const getAdminProfile = async (req, res) => {
   }
 };
 
+const getRegisteredWarranties = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || "";
+
+    const skip = (page - 1) * limit;
+
+    // 🔍 Search condition
+    const whereCondition = search
+      ? {
+        OR: [
+          { name: { contains: search } },
+        ],
+      }
+      : {};
+
+    // 📦 Fetch data
+    const [warranties, totalItems] = await Promise.all([
+      prisma.warranty.findMany({
+        where: whereCondition,
+        orderBy: { registeredAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.warranty.count({
+        where: whereCondition,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalItems / limit);
+
+    res.status(200).json({
+      data: warranties,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        limit,
+      },
+    });
+  } catch (error) {
+    console.error("Get registered warranties error:", error);
+    res.status(500).json({
+      error: "Failed to fetch registered warranties",
+    });
+  }
+};
+// GET /api/registered-warranties/:id
+const getRegisteredWarrantyById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const warranty = await prisma.warranty.findUnique({
+      where: { id: Number(id) },
+    });
+
+    if (!warranty) {
+      return res.status(404).json({ error: 'Warranty not found' });
+    }
+
+    res.status(200).json({ data: warranty });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch warranty' });
+  }
+};
+
+
 const updateAdminProfile = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -190,5 +259,7 @@ const deleteProfilePicture = async (req, res) => {
 module.exports = {
   getAdminProfile,
   updateAdminProfile,
+  getRegisteredWarranties,
+  getRegisteredWarrantyById,
   deleteProfilePicture,
 };

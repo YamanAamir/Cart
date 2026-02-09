@@ -46,6 +46,7 @@ import CheckoutPage from "./pages/CheckoutPage";
 import Contact from "./pages/Contact";
 import OurPolicies from "./pages/OurPolicies";
 import FAQs from "./pages/FAQs";
+import WarrantyRegistration from "./pages/WarrantyRegistration";
 
 function App() {
   return (
@@ -130,6 +131,14 @@ function App() {
           element={
             <MainLayout>
               <OurPolicies />
+            </MainLayout>
+          }
+        />
+        <Route
+          path="/Warranty-Policy"
+          element={
+            <MainLayout>
+              <WarrantyRegistration />
             </MainLayout>
           }
         />

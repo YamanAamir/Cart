@@ -18,5 +18,8 @@ const sendEmail = async ({ to, subject, html }) => {
     html,
   });
 };
+const sendNormalEmail = async (to, subject, html) => {
+  return sendEmail({ to, subject, html });
+};
 
-module.exports = sendEmail;
+module.exports = { sendEmail, sendNormalEmail };

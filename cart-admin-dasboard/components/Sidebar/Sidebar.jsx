@@ -46,11 +46,11 @@ export default function Sidebar() {
   };
 
   const menuSections = [
-   
+
     {
       section: 'Product Management',
       items: [
-        
+
         {
           name: 'Products',
           path: '/admin/products',
@@ -58,7 +58,7 @@ export default function Sidebar() {
           subItems: [
             { name: 'Create Product', path: '/admin/products/create' },
             { name: 'Product List', path: '/admin/products/list' },
-            
+
           ],
         },
         {
@@ -68,7 +68,7 @@ export default function Sidebar() {
           subItems: [
             { name: 'Create Brands', path: '/admin/brands/create' },
             { name: 'Brands List', path: '/admin/brands/list' },
-            
+
           ],
         },
         {
@@ -78,7 +78,7 @@ export default function Sidebar() {
           subItems: [
             { name: 'Create Models', path: '/admin/models/create' },
             { name: 'Models List', path: '/admin/models/list' },
-            
+
           ],
         },
         {
@@ -88,12 +88,35 @@ export default function Sidebar() {
           subItems: [
             { name: 'Create Product Types', path: '/admin/product-types/create' },
             { name: 'Product Types List', path: '/admin/product-types/list' },
-            
+
           ],
         },
+
       ],
     },
-    
+    {
+      section: 'Website Management',
+      items: [
+        {
+          name: 'Registered Warranty',
+          path: '/admin/registered-warranty',
+          icon: Package,
+          // subItems: [
+          //   { name: 'Registered Warranty List', path: '/admin/registered-warranty/list' },
+
+          // ],
+        },
+        {
+          name: 'Stats Cards',
+          path: '/admin/stats-cards',
+          icon: Package,
+          subItems: [
+            { name: 'Create Stats Cards', path: '/admin/stats-cards/create' },
+            { name: 'Stats Cards List', path: '/admin/stats-cards/list' },
+          ],
+        },
+      ]
+    },
 
     {
       section: 'Green Grass Management',
@@ -108,7 +131,7 @@ export default function Sidebar() {
         },
       ],
     },
-    
+
     {
       section: 'User Management',
       items: [
@@ -133,7 +156,7 @@ export default function Sidebar() {
           icon: UserRoundCog,
           subItems: [
             { name: 'Order List', path: '/admin/orders/list' },
-            
+
           ],
         },
       ],
@@ -152,7 +175,7 @@ export default function Sidebar() {
         },
       ],
     },
-    
+
   ];
 
   return (
@@ -171,7 +194,7 @@ export default function Sidebar() {
       >
         <Link href="/admin/dashboard" className="flex items-center gap-3 mb-6 sm:mb-8">
           <img src="https://elipsestudio.com/club-pro/assets/clubpro_logo.webp" alt="Qist Market" className='w-100 h-15' />
-          
+
         </Link>
         <nav className="flex-1">
           {menuSections.map((section) => (

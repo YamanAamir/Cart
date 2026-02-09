@@ -10,7 +10,7 @@ import {
 import { BASE_API } from "../utils/api";
 
 export default function ShopCategory() {
-const { brandName, modelId } = useParams();
+  const { brandName, modelId } = useParams();
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,66 +41,66 @@ const { brandName, modelId } = useParams();
   }, []);
 
   useEffect(() => {
-  const fetchProducts = async () => {
-    setLoading(true);
-    setError(null);
+    const fetchProducts = async () => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: "20",
-        sort:
-          sortBy === "price-low"
-            ? "salePrice"
-            : sortBy === "price-high"
-            ? "salePrice"
-            : "createdAt",
-        order:
-          sortBy === "price-low"
-            ? "asc"
-            : sortBy === "price-high"
-            ? "desc"
-            : "desc",
-      });
+      try {
+        const params = new URLSearchParams({
+          page: currentPage.toString(),
+          limit: "20",
+          sort:
+            sortBy === "price-low"
+              ? "salePrice"
+              : sortBy === "price-high"
+                ? "salePrice"
+                : "createdAt",
+          order:
+            sortBy === "price-low"
+              ? "asc"
+              : sortBy === "price-high"
+                ? "desc"
+                : "desc",
+        });
 
-      // 🔑 BRAND FILTER
-      if (brandName) {
-        params.set("brand", brandName);
+        // 🔑 BRAND FILTER
+        if (brandName) {
+          params.set("brand", brandName);
+        }
+
+        // 🔑 MODEL FILTER
+        if (modelId) {
+          params.set("modelId", modelId);
+        }
+
+        const url = `${BASE_API}/products?${params}`;
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const data = await res.json();
+        setProducts(data.data || []);
+        setPagination(data.pagination || { totalItems: 0, totalPages: 1 });
+      } catch (err) {
+        console.error(err);
+        setError("Could not load products");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // 🔑 MODEL FILTER
-      if (modelId) {
-        params.set("modelId", modelId);
-      }
-
-      const url = `${BASE_API}/products?${params}`;
-
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-      const data = await res.json();
-      setProducts(data.data || []);
-      setPagination(data.pagination || { totalItems: 0, totalPages: 1 });
-    } catch (err) {
-      console.error(err);
-      setError("Could not load products");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchProducts();
-}, [brandName, modelId, sortBy, currentPage]);
+    fetchProducts();
+  }, [brandName, modelId, sortBy, currentPage]);
 
   useEffect(() => {
-  if (brandName) {
-    setSelectedBrand(brandName);
-  } else {
-    setSelectedBrand(null);
-  }
+    if (brandName) {
+      setSelectedBrand(brandName);
+    } else {
+      setSelectedBrand(null);
+    }
 
-  setCurrentPage(1);
-}, [brandName, modelId]);
+    setCurrentPage(1);
+  }, [brandName, modelId]);
 
 
   const categoryTitle = brandName
@@ -150,11 +150,10 @@ const { brandName, modelId } = useParams();
                 return (
                   <div key={brand.id}>
                     <div
-                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                        isSelected
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm transition-colors ${isSelected
                           ? "bg-amber-50 text-[#f9c821] font-medium"
                           : "hover:bg-gray-50 text-gray-700"
-                      }`}
+                        }`}
                     >
                       {/* Brand name → navigate */}
                       <Link
@@ -179,9 +178,8 @@ const { brandName, modelId } = useParams();
                         >
                           <ChevronDown
                             size={16}
-                            className={`transition-transform ${
-                              isSelected ? "rotate-180" : ""
-                            }`}
+                            className={`transition-transform ${isSelected ? "rotate-180" : ""
+                              }`}
                           />
                         </button>
                       )}
@@ -190,19 +188,17 @@ const { brandName, modelId } = useParams();
                     {/* Dropdown BELOW brand */}
                     {brand.models?.length > 0 && (
                       <div
-                        className={`overflow-hidden transition-all duration-200 ${
-                          isSelected
+                        className={`overflow-hidden transition-all duration-200 ${isSelected
                             ? "max-h-96 opacity-100"
                             : "max-h-0 opacity-0"
-                        }`}
+                          }`}
                       >
                         <ul className="mt-1 ml-4 pl-3 border-l-2 border-amber-200 space-y-1">
                           {brand.models.map((model) => (
                             <li key={model.id}>
                               <Link
-                                to={`/shop/${encodeURIComponent(brand.name)}/${
-                                  model.id
-                                }`}
+                                to={`/shop/${encodeURIComponent(brand.name)}/${model.id
+                                  }`}
                                 className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700 transition-colors"
                               >
                                 {model.name}
@@ -283,9 +279,8 @@ const { brandName, modelId } = useParams();
                     {/* Square image only */}
                     <div className="relative w-full aspect-square bggray-100 overflow-hidden">
                       <img
-                        src={`https://api.clubpromfg.com/uploads/products/${
-                          product.imageOne || "placeholder.jpg"
-                        }`}
+                        src={`https://api.clubpromfg.com//uploads/products/${product.imageOne || "placeholder.jpg"
+                          }`}
                         alt={product.name}
                         className="absolute inset-0 w-full h54 object-cover group-hover:scale-105 transition-transform duration-300"
                         loading="lazy"
@@ -297,7 +292,8 @@ const { brandName, modelId } = useParams();
                         {product.name}
                       </h3>
                       <div className="text-xs sm:text-sm text-gray-600 mb-2">
-                        {product.brand?.name} • {product.model?.name}
+                        {product.brand?.name} • {product.model?.name} • {product?.color || "N/A"}
+                        {/* <p>Color: {product?.color || "N/A"}</p> */}
                       </div>
                       <div className="flex items-baseline gap-3">
                         <span className="text-xl sm:text-2xl font-bold text-amber-700">
@@ -369,11 +365,10 @@ const { brandName, modelId } = useParams();
                   setShowMobileFilter(false);
                   setCurrentPage(1);
                 }}
-                className={`w-full text-left px-4 py-3 rounded-lg ${
-                  !selectedBrand
+                className={`w-full text-left px-4 py-3 rounded-lg ${!selectedBrand
                     ? "bg-amber-50 text-amber-800 font-medium"
                     : "hover:bg-gray-50"
-                }`}
+                  }`}
               >
                 All Brands
               </button>
@@ -388,11 +383,10 @@ const { brandName, modelId } = useParams();
                     setShowMobileFilter(false);
                     setCurrentPage(1);
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-lg ${
-                    selectedBrand === brand.name
+                  className={`w-full text-left px-4 py-3 rounded-lg ${selectedBrand === brand.name
                       ? "bg-amber-50 text-amber-800 font-medium"
                       : "hover:bg-gray-50"
-                  }`}
+                    }`}
                 >
                   {brand.name}
                 </button>

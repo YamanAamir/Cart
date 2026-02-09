@@ -116,7 +116,7 @@ export default function ProductDetail() {
             {/* Main Image */}
             <div className="relative bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
               <img
-                src={`https://api.clubpromfg.com/uploads/products/${images[activeImage]}`}
+                src={`https://api.clubpromfg.com//uploads/products/${images[activeImage]}`}
                 alt={product.name}
                 className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-cover transition-all duration-300"
               />
@@ -163,7 +163,7 @@ export default function ProductDetail() {
                       }`}
                   >
                     <img
-                      src={`https://api.clubpromfg.com/uploads/products/${img}`}
+                      src={`https://api.clubpromfg.com//uploads/products/${img}`}
                       alt=""
                       className="w-full h-full object-cover"
                     />
@@ -263,7 +263,7 @@ export default function ProductDetail() {
                   id: product.id,
                   name: product.name,
                   price: priceToUse,
-                  image: `https://api.clubpromfg.com/uploads/products/${images[0]}`,
+                  image: `https://api.clubpromfg.com//uploads/products/${images[0]}`,
                   quantity: quantity
 
                 })

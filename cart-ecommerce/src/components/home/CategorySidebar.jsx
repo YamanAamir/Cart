@@ -61,7 +61,7 @@ export default function CategorySidebar() {
             <li key={brand.id}>
               <CategoryItem
                 name={brand.name}
-                logo={`https://api.clubpromfg.com${brand.logo}`}
+                logo={`https://api.clubpromfg.com/${brand.logo}`}
                 path={brand.path}
                 models={brand.models || []} // ← pass models array!
                 variant="sidebar"

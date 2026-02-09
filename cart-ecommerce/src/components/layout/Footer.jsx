@@ -80,6 +80,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-black">
               <li className="hover:text-black/80 transition-colors cursor-pointer"><Link to={"/contact"}>Contact Us</Link></li>
               <li className="hover:text-black/80 transition-colors cursor-pointer"><Link to={"/our-policies"}>Our Policies</Link></li>
+              <li className="hover:text-black/80 transition-colors cursor-pointer"><Link to={"/Warranty-Policy"}>Warranty Policy</Link></li>
               {/* <li className="hover:text-black/80 transition-colors cursor-pointer"><Link to={"/faq"}>FAQ</Link></li> */}
             </ul>
           </div>
