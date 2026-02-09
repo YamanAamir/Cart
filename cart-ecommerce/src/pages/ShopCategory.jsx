@@ -279,7 +279,7 @@ export default function ShopCategory() {
                     {/* Square image only */}
                     <div className="relative w-full aspect-square bggray-100 overflow-hidden">
                       <img
-                        src={`https://api.clubpromfg.com//uploads/products/${product.imageOne || "placeholder.jpg"
+                        src={`http://localhost:5000//uploads/products/${product.imageOne || "placeholder.jpg"
                           }`}
                         alt={product.name}
                         className="absolute inset-0 w-full h54 object-cover group-hover:scale-105 transition-transform duration-300"
