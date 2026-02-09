@@ -107,6 +107,45 @@ export default function ShopCategory() {
     ? brandName.charAt(0).toUpperCase() + brandName.slice(1)
     : "";
 
+  const utilityBrand = {
+    "id": 9,
+    "name": "Utility",
+    "createdAt": "2025-12-23T20:19:09.219Z",
+    "updatedAt": "2026-01-19T16:25:56.919Z",
+    "path": "/brand/utility",
+    "logo": "/uploads/brands/1768839956724-109582124.png",
+    "models": [
+      {
+        "id": 29,
+        "name": "Umax",
+        "brandId": 4,
+        "brandName": "Yamaha",
+        "createdAt": "2025-12-22T13:44:20.648Z",
+        "updatedAt": "2025-12-22T13:44:20.648Z"
+      },
+      {
+        "id": 18,
+        "name": "Carryall",
+        "brandId": 1,
+        "brandName": "ClubCar",
+        "createdAt": "2025-12-22T13:43:53.369Z",
+        "updatedAt": "2025-12-22T13:43:53.369Z"
+      },
+      {
+        "id": 19,
+        "name": "Carryall 502",
+        "brandId": 1,
+        "brandName": "ClubCar",
+        "createdAt": "2025-12-22T13:43:59.665Z",
+        "updatedAt": "2025-12-22T13:43:59.665Z"
+      }
+    ]
+  }
+
+  const normalBrands = brands.filter(
+    (b) => b.name.toLowerCase() !== "utility"
+  );
+
   return (
     <div className="bg-gray-50 min-h-screen pb-12 ">
       {/* Breadcrumbs + Track Order */}
@@ -144,7 +183,7 @@ export default function ShopCategory() {
               <ChevronDown size={18} className="text-gray-500" />
             </h3>
             <div className="max-h-[60vh] overflow-y-auto space-y-1">
-              {brands.map((brand) => {
+              {normalBrands.map((brand) => {
                 const isSelected = selectedBrand === brand.name;
 
                 return (
@@ -211,6 +250,28 @@ export default function ShopCategory() {
                   </div>
                 );
               })}
+              {/* STATIC UTILITY */}
+              {utilityBrand && (
+                <div className="mb-4">
+                  <div className="px-3 py-2.5 rounded-lg bg-amber-50 text-[#f9c821] font-medium text-sm">
+                    Utility
+                  </div>
+
+                  <ul className="mt-2 ml-4 pl-3 border-l-2 border-amber-300 space-y-1">
+                    {utilityBrand.models.map((model) => (
+                      <li key={model.id}>
+                        <Link
+                          to={`/shop/${model.brandName}/${model.id}`}
+                          className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700"
+                        >
+                          {model.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
             </div>
           </aside>
 

@@ -7,7 +7,7 @@ const jwt = require("jsonwebtoken");
 
 
 
-exports.getProfile= async (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
     const customer = await prisma.customers.findUnique({
       where: { id: req.user.id },
@@ -70,15 +70,20 @@ exports.updateProfile = async (req, res) => {
     !commercialStreet &&
     !commercialCity &&
     !commercialState &&
-    !commercialZip &&
+    !commercialZip && 
     !commercialCountry
   ) {
     return res.status(400).json({ error: 'No data provided to update' });
   }
+  const customerId = req.user?.id; // or wherever you get the logged-in customer's id
+
+  if (!customerId) {
+    return res.status(400).json({ message: "Customer ID is required" });
+  }
 
   try {
     const updatedCustomer = await prisma.customers.update({
-      where: { id: req.user.userId },
+      where: { id: customerId  },
       data: {
         fullName,
         billingStreet,
@@ -128,7 +133,7 @@ exports.updateProfile = async (req, res) => {
  * UPDATE CUSTOMER
  */
 exports.changePassword = async (req, res) => {
- const { oldPassword, newPassword } = req.body;
+  const { oldPassword, newPassword } = req.body;
 
   if (!oldPassword || !newPassword) {
     return res.status(400).json({ error: 'Current and new password are required' });
