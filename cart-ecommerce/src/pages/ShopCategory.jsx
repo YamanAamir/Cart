@@ -147,7 +147,7 @@ export default function ShopCategory() {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-12 ">
+    <div className="bg-gray-50 min-h-screen pb-12 md32:pt-0 pt-16">
       {/* Breadcrumbs + Track Order */}
       <div className="bg-[#f9c821] border-b border-gray-200 sticky top-45 z-10 hidden md:block ">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-sm ">

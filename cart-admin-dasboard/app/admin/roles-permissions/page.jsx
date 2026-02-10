@@ -114,13 +114,24 @@ export default function RolesAndPermissions() {
   const [editAdminId, setEditAdminId] = useState(null);
 
   useEffect(() => {
-    if (!user?.isSuper) {
-      router.push('/admin/dashboard');
+    console.log("user", user);
+
+    // if (user?.isAccess !== 'HIGH') {
+    //   router.push('/admin/dashboard');
+    //   toast.error('Access denied. Super admin privileges required.');
+    //   return;
+    // }
+    // fetchStats();
+    // fetchAdmins();
+    if (!user) return; // wait for auth to load
+
+    if (user.isAccess !== 'HIGH') {
+      router.replace('/admin/dashboard');
       toast.error('Access denied. Super admin privileges required.');
-      return;
+    } else {
+      fetchStats();
+      fetchAdmins();
     }
-    fetchStats();
-    fetchAdmins();
   }, [user, router, pagination.currentPage, pagination.limit]);
 
   const fetchStats = async () => {

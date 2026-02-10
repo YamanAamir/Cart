@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
-const sendEmail = require("../utils/sendEmail");
+const { sendEmail } = require("../utils/sendEmail");
 const { put } = require("@vercel/blob");
 
 const prisma = new PrismaClient();
@@ -61,19 +61,16 @@ const getDealerEmailTemplate = (dealer) => {
             <span class="label">Location:</span> ${dealer.location || "N/A"}
           </div>
           <div class="info-row">
-  <span class="label">Interested Brands:</span> ${
-    dealer.interestedBrands.join(", ") || "None"
-  }
+  <span class="label">Interested Brands:</span> ${dealer.interestedBrands.join(", ") || "None"
+    }
 </div>
 <div class="info-row">
-  <span class="label">Sell Brands:</span> ${
-    dealer.sellBrands.join(", ") || "None"
-  }
+  <span class="label">Sell Brands:</span> ${dealer.sellBrands.join(", ") || "None"
+    }
 </div>
 <div class="info-row">
-  <span class="label">Authorized Dealer:</span> ${
-    dealer.authorizedDealer.join(", ") || "None"
-  }
+  <span class="label">Authorized Dealer:</span> ${dealer.authorizedDealer.join(", ") || "None"
+    }
 </div>
 
           <div class="info-row">
@@ -128,7 +125,7 @@ const getDealerConfirmationTemplate = (dealer) => {
 const sendNormalEmail = async (to, subject, html) => {
   try {
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || '"Dealer Portal" <noreply@example.com>',
+      from: process.env.FROM_EMAIL,
       to,
       subject,
       html,
@@ -152,6 +149,19 @@ const createDealerRegistration = async (req, res) => {
     }
 
     const data = req.body;
+    const email= data.email;
+
+    // Check for existing registration with the same email
+    const existingRegistration = await prisma.dealerRegistration.findUnique({
+      where: { email },
+    });
+
+    if (existingRegistration) {
+      return res.status(400).json({
+        success: false,
+        error: "A registration with this email already exists",
+      });
+    }
 
     let resaleCertificate = null;
 
@@ -226,16 +236,16 @@ const getAllDealerRegistrationsPagination = async (req, res) => {
     // Build search conditions across multiple relevant fields
     const where = search
       ? {
-          OR: [
-            { companyName: { contains: search, mode: "insensitive" } },
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
-            { phone: { contains: search, mode: "insensitive" } },
-            { commercialCity: { contains: search, mode: "insensitive" } },
-            { commercialState: { contains: search, mode: "insensitive" } },
-          ],
-        }
+        OR: [
+          { companyName: { contains: search, mode: "insensitive" } },
+          { firstName: { contains: search, mode: "insensitive" } },
+          { lastName: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+          { phone: { contains: search, mode: "insensitive" } },
+          { commercialCity: { contains: search, mode: "insensitive" } },
+          { commercialState: { contains: search, mode: "insensitive" } },
+        ],
+      }
       : {};
 
     const [dealers, totalItems] = await Promise.all([
@@ -522,5 +532,5 @@ module.exports = {
   getAllDealerRegistrationsPagination,
   getDealerRegistrationById,
   toggleDealerRegistration,
-bulkDeleteDealerRegistrations,  updateDealerRegistration,
+  bulkDeleteDealerRegistrations, updateDealerRegistration,
 };

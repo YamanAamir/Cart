@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { baseUrl } from './const';
 
 const api = axios.create({
-  baseURL: 'https://api.clubpromfg.com/api',
-  // baseURL: 'https://api.clubpromfg.com/api',
+  baseURL: `${baseUrl}/api`,
+  // baseURL: '${baseUrl}/api',
   headers: {
     'Content-Type': 'application/json',
   },

@@ -5,7 +5,7 @@ const { validationResult } = require('express-validator');
 const prisma = new PrismaClient();
 
 const checkSuperAdmin = (req, res, next) => {
-  if (!req.user.isSuper) {
+  if (req.user.isAccess !== 'HIGH') {
     return res.status(403).json({ error: 'Access denied. Super admin privileges required.' });
   }
   next();
