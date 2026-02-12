@@ -1,10 +1,19 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [carts, setCarts] = useState([]); // always an array
+  // const [carts, setCarts] = useState([]); // always an array
+  // 🔥 Load cart from localStorage on first render
+  const [carts, setCarts] = useState(() => {
+    const savedCart = localStorage.getItem("cart");
+    return savedCart ? JSON.parse(savedCart) : [];
+  });
 
+  // 🔥 Save to localStorage whenever cart changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(carts));
+  }, [carts]);
   // Add products to cart
   const addItem = (newItems) => {
     setCarts(prev => {
@@ -19,7 +28,7 @@ export const CartProvider = ({ children }) => {
         }
       });
       console.log(updated);
-      
+
       return updated;
     });
   };

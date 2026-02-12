@@ -26,6 +26,7 @@ import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { Textarea } from "@/components/ui/textarea";
+import { baseUrl } from "@/lib/const";
 
 export default function ProductDetails() {
   const router = useRouter();
@@ -536,7 +537,7 @@ export default function ProductDetails() {
             />
           ) : mainImage ? (
             <Image
-              src={`${baseUrl}/uploads/products/${mainImage}`}
+              src={`https://api.clubpromfg.com/uploads/products/${mainImage}`}
               alt="Main product"
               fill
               className="object-cover"
@@ -554,7 +555,7 @@ export default function ProductDetails() {
           {["imageOne", "imageTwo", "imageThree", "imageFour"].map((field) => {
             const previewSrc = imagePreviews[field]?.startsWith("data:")
               ? imagePreviews[field]
-              : `${baseUrl}/uploads/products/${imagePreviews[field]}`;
+              : `https://api.clubpromfg.com/uploads/products/${imagePreviews[field]}`;
 
             return (
               <div key={field} className="relative group">

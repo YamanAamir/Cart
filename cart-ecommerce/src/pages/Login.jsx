@@ -39,9 +39,9 @@ export default function LoginPage() {
       }
 
       // ✅ Store token
-      
-        localStorage.setItem("token", data.token);
-      
+
+      localStorage.setItem("token", data.token);
+
       // Optional: store user info
       localStorage.setItem("user", JSON.stringify(data.user));
 
@@ -59,18 +59,18 @@ export default function LoginPage() {
       <div className="max-w-md w-full space-y-8 bg-gray-50 p-10 rounded-2xl">
         <div className="text-center">
           <div className="mx-auto w-50 flex items-center justify-center shadow-lg">
-  <a
-    href="https://clubpro.com/"
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    <img
-      src={Logo}
-      alt="ClubPro Logo"
-      className="cursor-pointer"
-    />
-  </a>
-</div>
+            <a
+              href="https://clubpro.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={Logo}
+                alt="ClubPro Logo"
+                className="cursor-pointer"
+              />
+            </a>
+          </div>
 
           <h2 className="mt-6 text-2xl font-bold text-gray-900">
             GREEN GRASS
@@ -130,6 +130,14 @@ export default function LoginPage() {
                 Remember me
               </label>
             </div>
+            <button
+              type="button"
+              onClick={() => navigate("/forgot-password")}
+              className="text-sm hover:text-yellow-700 underline text-yellow-600 font-bold"
+            >
+              Forget Password
+            </button>
+
           </div>
 
           <button
@@ -142,24 +150,24 @@ export default function LoginPage() {
         </form>
 
         <div className="mt-10 text-center">
-           <button
-    className="w-full py-3 px-4 border-2 border-yellow-500 rounded-md text-yellow-600 font-bold hover:bg-yellow-50"
-    onClick={() => navigate("/dealer-registration")}
-  >
-    Request Access
-  </button>
-
-  <div className="mt-6">
-    <p className="text-sm text-gray-600">
-      Looking for more information on Club Pro?{" "}
-      <a
-        href="https://clubpro.com/"
-        className="text-yellow-600 font-semibold hover:underline"
-      >
-        Click Here
-      </a>
-    </p>
-  </div>
+          <button
+            className="w-full py-3 px-4 border-2 border-yellow-500 rounded-md text-yellow-600 font-bold hover:bg-yellow-50"
+            onClick={() => navigate("/dealer-registration")}
+          >
+            Request Access
+          </button>
+      
+          <div className="mt-6">
+            <p className="text-sm text-gray-600">
+              Looking for more information on Club Pro?{" "}
+              <a
+                href="https://clubpro.com/"
+                className="text-yellow-600 font-semibold hover:underline"
+              >
+                Click Here
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

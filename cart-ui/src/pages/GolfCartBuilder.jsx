@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import cardImg from "/assets/cpm_club_car.webp";
-import { api } from "../utils/api";
+import { api, BASE_URL } from "../utils/api";
 
 // Skeleton Loader Component
 const SkeletonLoader = () => (
@@ -48,31 +48,107 @@ export default function GolfCartBuilder() {
   const [openSection, setOpenSection] = useState(null);
   const [selections, setSelections] = useState({ items: {} });
 
+  const utilityBrand = {
+    "id": 9,
+    "name": "Utility",
+    "createdAt": "2025-12-23T20:19:09.219Z",
+    "updatedAt": "2026-01-19T16:25:56.919Z",
+    "path": "/brand/utility",
+    "logo": "/uploads/brands/1768839956724-109582124.png",
+    "models": [
+      {
+        "id": 29,
+        "name": "Umax",
+        "brandId": 4,
+        "brandName": "Yamaha",
+        "createdAt": "2025-12-22T13:44:20.648Z",
+        "updatedAt": "2025-12-22T13:44:20.648Z"
+      },
+      {
+        "id": 18,
+        "name": "Carryall",
+        "brandId": 1,
+        "brandName": "ClubCar",
+        "createdAt": "2025-12-22T13:43:53.369Z",
+        "updatedAt": "2025-12-22T13:43:53.369Z"
+      },
+      {
+        "id": 19,
+        "name": "Carryall 502",
+        "brandId": 1,
+        "brandName": "ClubCar",
+        "createdAt": "2025-12-22T13:43:59.665Z",
+        "updatedAt": "2025-12-22T13:43:59.665Z"
+      }
+    ]
+  }
+
   // Fetch brand and default model
+  // useEffect(() => {
+  //   const fetchBrand = async () => {
+  //     setGroupedProducts({});
+  //     setLoading(true);
+  //     try {
+  //       const data = await api.get(`/brands/slug/${brandSlug}`);
+  //       setBrand(data);
+  //       if (data.logo) {
+  //         setBrandLogo(`${data.logo}`);
+  //       } else {
+  //         setBrandLogo(null);
+  //       }
+  //       if (data.models?.length > 0) {
+  //         setSelectedModel(data.models[0]);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching brand:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchBrand();
+  // }, [brandSlug]);
   useEffect(() => {
     const fetchBrand = async () => {
       setGroupedProducts({});
       setLoading(true);
+
       try {
+        // ✅ If brand is utility, use static data
+        if (brandSlug === "utility") {
+          setBrand(utilityBrand);
+          setBrandLogo(utilityBrand.logo || null);
+
+          if (utilityBrand.models?.length > 0) {
+            setSelectedModel(utilityBrand.models[0]);
+          }
+
+          setLoading(false);
+          return; // stop further execution (no API call)
+        }
+
+        // ✅ Otherwise call API
         const data = await api.get(`/brands/slug/${brandSlug}`);
         setBrand(data);
+
         if (data.logo) {
           setBrandLogo(`${data.logo}`);
         } else {
           setBrandLogo(null);
         }
+
         if (data.models?.length > 0) {
           setSelectedModel(data.models[0]);
         }
+
       } catch (error) {
         console.error("Error fetching brand:", error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchBrand();
   }, [brandSlug]);
-
   // Fetch model products + sahi price logic yahan lagayi
   useEffect(() => {
     if (!selectedModel?.id) {

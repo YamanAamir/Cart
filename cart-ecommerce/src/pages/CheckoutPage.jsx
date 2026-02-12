@@ -4,6 +4,7 @@ import { useCart } from '../context/CartContext'; // adjust path according to yo
 import { Link } from 'react-router-dom';
 import { ArrowRight, Trash2 } from 'lucide-react';
 import { loadStripe } from "@stripe/stripe-js";
+import { BASE_API } from '../utils/api';
 const stripePromise = loadStripe("pk_live_51S0HgIFDBW3pcErGOmI6vsVCXStMih46KJXjrOiFHppAj6h0tHOp4zDYMoLyTQn7Uk99pePatnCFrqLh6AAblGa300Wm8qbiRe");
 
 const CheckoutPage = () => {
@@ -43,8 +44,7 @@ const CheckoutPage = () => {
     };
 
     const response = await fetch(
-      // 'https://api.clubpromfg.com/api/checkout/stripe-session',
-      'https://api.clubpromfg.com/api/checkout/stripe-session',
+      `${BASE_API}/checkout/stripe-session`,
       {
         method: 'POST',
         headers: {

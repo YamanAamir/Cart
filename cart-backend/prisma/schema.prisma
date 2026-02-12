@@ -23,26 +23,52 @@ model admins {
 }
 
 model customers {
-  id                Int           @id @default(autoincrement())
-  fullName          String        @db.VarChar(255)
-  email             String        @unique(map: "email") @db.VarChar(255)
-  password          String        @db.VarChar(255)
-  createdAt         DateTime?     @default(now()) @db.DateTime(0)
-  updatedAt         DateTime?     @updatedAt
-  isActive          Boolean       @default(true)
-  billingCity       String
-  billingCountry    String
-  billingState      String
-  billingStreet     String
-  billingZip        String
-  commercialCity    String
-  commercialCountry String
-  commercialState   String
-  commercialStreet  String
-  commercialZip     String
-  order             Order[]
-  savedBuilds       savedBuilds[]
-  warranties        Warranty[]
+  id                    Int                    @id @default(autoincrement())
+  fullName              String                 @db.VarChar(255)
+  email                 String                 @unique(map: "email") @db.VarChar(255)
+  password              String                 @db.VarChar(255)
+  createdAt             DateTime?              @default(now()) @db.DateTime(0)
+  updatedAt             DateTime?              @updatedAt
+  isActive              Boolean                @default(true)
+  billingCity           String
+  billingCountry        String
+  billingState          String
+  billingStreet         String
+  billingZip            String
+  commercialCity        String
+  commercialCountry     String
+  commercialState       String
+  commercialStreet      String
+  commercialZip         String
+  order                 Order[]
+  savedBuilds           savedBuilds[]
+  warranties            Warranty[]
+  passwordResetAttempts PasswordResetAttempt[]
+  verificationCodes     VerificationCode[]
+}
+
+model PasswordResetAttempt {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  createdAt  DateTime @default(now())
+
+  customer customers @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
+}
+
+model VerificationCode {
+  id         Int      @id @default(autoincrement())
+  customerId Int
+  phone      String?
+  code       String
+  isForReset Boolean  @default(false)
+  expiry     DateTime
+  createdAt  DateTime @default(now())
+
+  customer customers @relation(fields: [customerId], references: [id])
+
+  @@index([customerId])
 }
 
 model savedBuilds {

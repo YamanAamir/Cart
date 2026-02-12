@@ -1,9 +1,9 @@
 // src/api/api.js
 
-// const BASE_URL = "http://localhost:5000/api";
+// export const BASE_URL = "http://localhost:5000/api"; // local api url
+export const BASE_URL = "https://api.clubpromfg.com/api"; // live api url
 
-const BASE_URL = "https://api.clubpromfg.com/api";
-
+export const BASE_IMAGE_URL = "http://localhost:5000/uploads/products/"; // local api url
 
 /**
  * Generic request helper

@@ -1,8 +1,8 @@
 import { Instagram, Facebook, Linkedin, Mail, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { BASE_URL } from "../utils/api";
 
-const BASE_API = "https://api.clubpromfg.com/api"
 
 export default function Footer() {
   const [brands, setBrands] = useState([]);
@@ -16,7 +16,7 @@ export default function Footer() {
           setError(null);
   
           // ← Replace with your actual API endpoint
-          const response = await fetch(`${BASE_API}/all-brands`, {
+          const response = await fetch(`${BASE_URL}/all-brands`, {
             headers: {
               Accept: "application/json",
               // add Authorization if needed: 'Authorization': `Bearer ${token}`,

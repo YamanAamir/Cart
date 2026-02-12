@@ -237,13 +237,13 @@ const getAllDealerRegistrationsPagination = async (req, res) => {
     const where = search
       ? {
         OR: [
-          { companyName: { contains: search, mode: "insensitive" } },
-          { firstName: { contains: search, mode: "insensitive" } },
-          { lastName: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-          { phone: { contains: search, mode: "insensitive" } },
-          { commercialCity: { contains: search, mode: "insensitive" } },
-          { commercialState: { contains: search, mode: "insensitive" } },
+          { companyName: { contains: search } },
+          { firstName: { contains: search } },
+          { lastName: { contains: search } },
+          { email: { contains: search } },
+          { phone: { contains: search } },
+          { commercialCity: { contains: search } },
+          { commercialState: { contains: search } },
         ],
       }
       : {};

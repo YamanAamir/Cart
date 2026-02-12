@@ -25,9 +25,6 @@ export default function GolfCartBuilder() {
       const res = await axios.get(
         `http://api.clubpromfg.com/api/brands/${brandMap[brandSlug]}`
       );
-      // const res = await axios.get(
-      //   `http://localhost:5000/api/brands/${brandMap[brandSlug]}`
-      // );
 
       setBrand(res.data);
       setSelectedModel(res.data.models[0]); // default model

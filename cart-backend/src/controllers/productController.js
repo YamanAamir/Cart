@@ -1,7 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
 const { put, del } = require("@vercel/blob");
 const prisma = new PrismaClient();
-
+const path = require("path");
+const fs = require("fs");
 // ==================== CREATE PRODUCT ====================
 const createProduct = async (req, res) => {
   try {
@@ -30,15 +31,15 @@ const createProduct = async (req, res) => {
 
     // Parse numeric fields safely
     const parsedRegularPrice = parseFloat(regularPrice);
-    const parsedSalePrice   = salePrice   ? parseFloat(salePrice)   : null;
-    const parsedStock       = parseInt(stock, 10);
-    const parsedBrandId     = parseInt(brandId, 10);
-    const parsedModelId     = parseInt(modelId, 10);
-    const parsedTypeId      = parseInt(typeId, 10);
+    const parsedSalePrice = salePrice ? parseFloat(salePrice) : null;
+    const parsedStock = parseInt(stock, 10);
+    const parsedBrandId = parseInt(brandId, 10);
+    const parsedModelId = parseInt(modelId, 10);
+    const parsedTypeId = parseInt(typeId, 10);
 
     const parsedWeightLb = weightLb ? parseFloat(weightLb) : null;
     const parsedLengthIn = lengthIn ? parseFloat(lengthIn) : null;
-    const parsedWidthIn  = widthIn  ? parseFloat(widthIn)  : null;
+    const parsedWidthIn = widthIn ? parseFloat(widthIn) : null;
     const parsedHeightIn = heightIn ? parseFloat(heightIn) : null;
 
     // Basic numeric validations
@@ -101,8 +102,8 @@ const createProduct = async (req, res) => {
         imageFour: imageFields.imageFour,
       },
       include: {
-        brand:       { select: { name: true } },
-        model:       { select: { name: true } },
+        brand: { select: { name: true } },
+        model: { select: { name: true } },
         productType: { select: { name: true } },
       },
     });
@@ -208,26 +209,64 @@ const updateProduct = async (req, res) => {
 
       currentImages[field] = `/uploads/products/${file.filename}`;
     }
+    // const imageFields = ["imageOne", "imageTwo", "imageThree", "imageFour"];
 
+    for (const field of imageFields) {
+      const file = req.files?.[field]?.[0];
+      const removeFlag = req.body[`remove_${field}`];
+
+      // 🔴 If remove flag sent
+      if (removeFlag === "true") {
+        if (currentImages[field]) {
+          const oldPath = path.join(
+            process.cwd(),
+            "uploads",
+            "products",
+            path.basename(currentImages[field])
+          );
+
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        currentImages[field] = null; // set DB value to null
+        continue;
+      }
+
+      // 🟢 If new file uploaded
+      if (file) {
+        if (currentImages[field]) {
+          const oldPath = path.join(
+            process.cwd(),
+            "uploads",
+            "products",
+            path.basename(currentImages[field])
+          );
+
+          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+        }
+
+        currentImages[field] = `/uploads/products/${file.filename}`;
+      }
+    }
     // ───────────────────────────────────────
     //           Build update data
     // ───────────────────────────────────────
     const updateData = {};
 
-    if (name !== undefined)          updateData.name          = name.trim();
-    if (regularPrice !== undefined)  updateData.regularPrice  = parseFloat(regularPrice);
-    if (salePrice !== undefined)     updateData.salePrice     = salePrice ? parseFloat(salePrice) : null;
-    if (stock !== undefined)         updateData.stock         = parseInt(stock, 10);
-    if (color !== undefined)         updateData.color         = color?.trim() || null;
-    if (brandId !== undefined)       updateData.brandId       = parseInt(brandId, 10);
-    if (modelId !== undefined)       updateData.modelId       = parseInt(modelId, 10);
-    if (typeId !== undefined)        updateData.typeId        = parseInt(typeId, 10);
+    if (name !== undefined) updateData.name = name.trim();
+    if (regularPrice !== undefined) updateData.regularPrice = parseFloat(regularPrice);
+    if (salePrice !== undefined) updateData.salePrice = salePrice ? parseFloat(salePrice) : null;
+    if (stock !== undefined) updateData.stock = parseInt(stock, 10);
+    if (color !== undefined) updateData.color = color?.trim() || null;
+    if (brandId !== undefined) updateData.brandId = parseInt(brandId, 10);
+    if (modelId !== undefined) updateData.modelId = parseInt(modelId, 10);
+    if (typeId !== undefined) updateData.typeId = parseInt(typeId, 10);
 
-    if (weightLb !== undefined)      updateData.weightLb      = weightLb ? parseFloat(weightLb) : null;
-    if (lengthIn !== undefined)      updateData.lengthIn      = lengthIn ? parseFloat(lengthIn) : null;
-    if (widthIn !== undefined)       updateData.widthIn       = widthIn  ? parseFloat(widthIn)  : null;
-    if (heightIn !== undefined)      updateData.heightIn      = heightIn ? parseFloat(heightIn) : null;
-    if (description !== undefined)   updateData.description   = description?.trim() || null;
+    if (weightLb !== undefined) updateData.weightLb = weightLb ? parseFloat(weightLb) : null;
+    if (lengthIn !== undefined) updateData.lengthIn = lengthIn ? parseFloat(lengthIn) : null;
+    if (widthIn !== undefined) updateData.widthIn = widthIn ? parseFloat(widthIn) : null;
+    if (heightIn !== undefined) updateData.heightIn = heightIn ? parseFloat(heightIn) : null;
+    if (description !== undefined) updateData.description = description?.trim() || null;
 
     // Always include current (possibly updated) image paths
     Object.assign(updateData, currentImages);
@@ -245,8 +284,8 @@ const updateProduct = async (req, res) => {
       where: { id: productId },
       data: updateData,
       include: {
-        brand:       { select: { name: true } },
-        model:       { select: { name: true } },
+        brand: { select: { name: true } },
+        model: { select: { name: true } },
         productType: { select: { name: true } },
       },
     });

@@ -20,6 +20,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Profile from "./pages/Profile";
 import Contact from "./pages/Contact";
 import OurPolicies from "./pages/OurPolicies";
+import ForgotPassword from "./pages/ForgotPassword";
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           {/* 🔓 Public route */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/dealer-registration" element={<DealerRegistration />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
 
           {/* 🔐 Everything else is protected */}

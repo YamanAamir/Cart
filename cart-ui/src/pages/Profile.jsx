@@ -10,8 +10,10 @@ import {
   Save,
   Loader2,
   Settings,
+  ArrowRight,
 } from "lucide-react";
-import { api } from "../utils/api";
+import { api, BASE_IMAGE_URL, BASE_URL } from "../utils/api";
+import { useCart } from "../context/CartContext";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -21,6 +23,8 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const { carts } = useCart();
+  // console.log(carts);
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -63,7 +67,7 @@ export default function Profile() {
           },
         });
 
-      
+
         setFormData({
           fullName: data.fullName || "",
           email: data.email || "",
@@ -128,68 +132,67 @@ export default function Profile() {
     setPasswordError("");
   };
 
- const handlePasswordSubmit = async (e) => {
-  e.preventDefault();
-  setPasswordError("");
-  setPasswordSuccess("");
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
 
-  if (!passwordForm.oldPassword || !passwordForm.newPassword) {
-    setPasswordError("All fields are required");
-    return;
-  }
-
-  if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
-    setPasswordError("New passwords do not match");
-    return;
-  }
-
-  if (passwordForm.newPassword.length < 8) {
-    setPasswordError("New password must be at least 8 characters");
-    return;
-  }
-
-  setPasswordSaving(true);
-
-  try {
-    const token = localStorage.getItem("token");
-
-    const response = await fetch(
-      // "http://localhost:5000/api/profile-password",
-      "https://api.clubpromfg.com/api/profile-password",
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          oldPassword: passwordForm.oldPassword,
-          newPassword: passwordForm.newPassword,
-        }),
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // 👈 backend error comes here
-      throw new Error(data.error || "Password update failed");
+    if (!passwordForm.oldPassword || !passwordForm.newPassword) {
+      setPasswordError("All fields are required");
+      return;
     }
 
-    setPasswordSuccess("Password changed successfully!");
-    setPasswordForm({
-      oldPassword: "",
-      newPassword: "",
-      confirmNewPassword: "",
-    });
+    if (passwordForm.newPassword !== passwordForm.confirmNewPassword) {
+      setPasswordError("New passwords do not match");
+      return;
+    }
 
-    setTimeout(() => setPasswordSuccess(""), 4000);
-  } catch (err) {
-    setPasswordError(err.message);
-  } finally {
-    setPasswordSaving(false);
-  }
-};
+    if (passwordForm.newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters");
+      return;
+    }
+
+    setPasswordSaving(true);
+
+    try {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch(
+        `${BASE_URL}/profile-password`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            oldPassword: passwordForm.oldPassword,
+            newPassword: passwordForm.newPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        // 👈 backend error comes here
+        throw new Error(data.error || "Password update failed");
+      }
+
+      setPasswordSuccess("Password changed successfully!");
+      setPasswordForm({
+        oldPassword: "",
+        newPassword: "",
+        confirmNewPassword: "",
+      });
+
+      setTimeout(() => setPasswordSuccess(""), 4000);
+    } catch (err) {
+      setPasswordError(err.message);
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
 
 
   if (loading) {
@@ -217,11 +220,10 @@ export default function Profile() {
             <nav className="space-y-2">
               <button
                 onClick={() => setActiveTab("edit")}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all ${
-                  activeTab === "edit"
-                    ? "bg-black/20 text-black font-semibold shadow-md"
-                    : "text-black/80 hover:bg-black/10"
-                }`}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all ${activeTab === "edit"
+                  ? "bg-black/20 text-black font-semibold shadow-md"
+                  : "text-black/80 hover:bg-black/10"
+                  }`}
               >
                 <User className="h-6 w-6" />
                 <span className="text-lg">Edit Profile</span>
@@ -229,14 +231,24 @@ export default function Profile() {
 
               <button
                 onClick={() => setActiveTab("password")}
-                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all ${
-                  activeTab === "password"
-                    ? "bg-black/20 text-black font-semibold shadow-md"
-                    : "text-black/80 hover:bg-black/10"
-                }`}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all ${activeTab === "password"
+                  ? "bg-black/20 text-black font-semibold shadow-md"
+                  : "text-black/80 hover:bg-black/10"
+                  }`}
               >
                 <Lock className="h-6 w-6" />
                 <span className="text-lg">Change Password</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab("savebuilds")}
+                className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl text-left transition-all ${activeTab === "savebuilds"
+                  ? "bg-black/20 text-black font-semibold shadow-md"
+                  : "text-black/80 hover:bg-black/10"
+                  }`}
+              >
+                <Lock className="h-6 w-6" />
+                <span className="text-lg">Save Builds</span>
               </button>
             </nav>
           </div>
@@ -411,6 +423,95 @@ export default function Profile() {
                     </button>
                   </div>
                 </form>
+              </>
+            )}
+
+            {activeTab === "savebuilds" && (
+              <>
+                <div className="flex flex-row justify-between items-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-800 ">
+                    Saved Builds
+                  </h2>
+                  {carts.length === 0 ? (
+                    <button
+                      onClick={() => navigate("/")}
+                      className="w-fit bg-[#f9c821] hover:bg-[#e0b318] text-white font-bold text-sm tracking-[0.2em] py-2 px-6 rounded-xl shadow-lg shadow-[#f9c821]/30 transition-all hover:scale-[1.02] active:scale-98 uppercase flex items-center justify-center gap-3"
+                    >
+                      Shop Now <ArrowRight className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => navigate("/checkout")}
+                      className="w-fit bg-[#f9c821] hover:bg-[#e0b318] text-white font-bold text-sm tracking-[0.2em] py-2 px-6 rounded-xl shadow-lg shadow-[#f9c821]/30 transition-all hover:scale-[1.02] active:scale-98 uppercase flex items-center justify-center gap-3"
+                    >
+                      Check Out <ArrowRight className="w-5 h-5" />
+                    </button>
+                  )}
+
+                </div>
+                {carts.length === 0 ? (
+                  <div className="text-center py-20 text-gray-500">
+                    No saved builds found.
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-1 xl:grid-cols-1 gap-6">
+                    {carts.map((build) => (
+                      <div
+                        key={build.id}
+                        className="flex flex-row items-start justify-start w-full gap-3 bg-white border border-[#ffc400] rounded-2xl shadow-md hover:shadow-xl transition-all p-3"
+                      >
+                        {/* Build Image */}
+                        <div className="">
+
+                          {build.imageOne && (
+                            <img
+                              src={`${BASE_IMAGE_URL}${build.imageOne}`}
+                              alt={build.name}
+                              className="w-full h-32 object-contain rounded-xl mb-4"
+                            />
+                          )}
+                        </div>
+                        <div className="">
+                          {/* Build Info */}
+                          <h3 className="text-lg font-semibold mb-2">
+                            {build.name}
+                          </h3>
+
+                          <p className="text-gray-600 text-sm mb-3">
+                            {build.description || "No description available"}
+                          </p>
+
+                          <div className="text-xs sm:text-sm text-gray-600 mb-2">
+                            {build?.productType.name ? `${build.productType.name}` : ""} {build?.color ? `• ${build.color}` : ""} {build?.qty ? `• ${build.qty} quantity` : ""}
+                          </div>
+
+                          {/* Price */}
+                          <div className="text-lg font-bold text-amber-700 mb-4">
+                            $ {build.regularPrice}
+                          </div>
+
+                          {/* Actions */}
+                          {/* <div className="flex justify-between items-center">
+                            <button
+                              onClick={() => navigate(`/builder/${build.id}`)}
+                              className="text-sm font-medium text-blue-600 hover:underline"
+                            >
+                              View
+                            </button>
+
+                            <button
+                              className="text-sm font-medium text-red-600 hover:underline"
+                            >
+                              Delete
+                            </button>
+                          </div> */}
+                        </div>
+
+                      </div>
+                    ))}
+
+                  </div>
+                )}
               </>
             )}
           </div>

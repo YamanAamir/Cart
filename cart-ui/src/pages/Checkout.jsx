@@ -2,7 +2,7 @@ import { useCart } from "../context/CartContext";
 import cardImg from "/assets/cpm_club_car.webp";
 import { ArrowRight, Trash2, ShoppingCart, Check } from "lucide-react";
 import { loadStripe } from "@stripe/stripe-js";
-import { api } from "../utils/api";
+import { api, BASE_URL } from "../utils/api";
 const stripePromise = loadStripe("pk_test_51SqJktJYkUUyRPvjEa2ZgYsjgiYBpp3LxxYbRnLCTkDjh84j6P7neAgiX09VqQd6AAVdQNsT5GShmCYFjYSjDoKJ00YYTJG23B"); // 🔑 Replace
 
 export default function Checkout() {
@@ -14,55 +14,55 @@ export default function Checkout() {
     0
   );
 
+  console.log('carts', carts);
 
-  
- const handleStripeCheckout = async () => {
-  const token = localStorage.getItem("token"); // get token at the time of request
 
-  try {
-    // Optional stock check
-    const outOfStock = carts.find(item => item.qty > item.stock);
-    if (outOfStock) {
-      alert(`${outOfStock.name} is out of stock`);
-      return;
+  const handleStripeCheckout = async () => {
+    const token = localStorage.getItem("token"); // get token at the time of request
+
+    try {
+      // Optional stock check
+      const outOfStock = carts.find(item => item.qty > item.stock);
+      if (outOfStock) {
+        alert(`${outOfStock.name} is out of stock`);
+        return;
+      }
+
+      // Prepare body
+      const body = {
+        items: carts.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+        })),
+      };
+
+      // Make the POST request with fetch
+      const response = await fetch(`${BASE_URL}/checkout/stripe-session`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",       // very important
+          "Authorization": `Bearer ${token}`,       // send JWT
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Stripe session request failed");
+      }
+
+      const data = await response.json();
+
+      // Redirect to Stripe checkout
+      window.location.href = data.url;
+
+    } catch (err) {
+      console.error("Stripe checkout failed:", err);
+      alert("Checkout failed: " + err.message);
     }
-
-    // Prepare body
-    const body = {
-      items: carts.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        qty: item.qty,
-      })),
-    };
-
-    // Make the POST request with fetch
-    const response = await fetch("https://api.clubpromfg.com/api/checkout/stripe-session", {
-    // const response = await fetch("http://localhost:5000/api/checkout/stripe-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",       // very important
-        "Authorization": `Bearer ${token}`,       // send JWT
-      },
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || "Stripe session request failed");
-    }
-
-    const data = await response.json();
-
-    // Redirect to Stripe checkout
-    window.location.href = data.url;
-
-  } catch (err) {
-    console.error("Stripe checkout failed:", err);
-    alert("Checkout failed: " + err.message);
-  }
-};
+  };
 
 
 

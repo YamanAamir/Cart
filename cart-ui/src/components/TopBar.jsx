@@ -9,7 +9,7 @@ export default function TopBar() {
           <span className="mx-4">•</span>
           <span className="mx-6">PREMIUM QUALITY GUARANTEED</span>
           <span className="mx-4">•</span>
-          <span className="mx-6">INDUSTRY LEADING 5 YEAR WARRANTY</span>
+          <span className="mx-6">INDUSTRY LEADING 5 YEAR ENCLOSURE WARRANTY</span>
         </div>
 
         {/* Moving marquee for mobile */}
@@ -18,7 +18,7 @@ export default function TopBar() {
           <span className="mx-2">•</span>
           <span className="mx-4">PREMIUM QUALITY GUARANTEED</span>
           <span className="mx-2">•</span>
-          <span className="mx-4">INDUSTRY LEADING 5 YEAR WARRANTY</span>
+          <span className="mx-4">INDUSTRY LEADING 5 YEAR ENCLOSURE WARRANTY</span>
         </div>
 
       </div>

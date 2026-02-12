@@ -10,6 +10,7 @@ import yellowfadedcar from "../assets/image2.png";
 import Footer from "./Footer";
 import TopBar from "./TopBar";
 import { Link } from "react-router-dom";
+import { BASE_URL } from "../utils/api";
 
 const images = [hero1, hero2, hero3];
 
@@ -134,8 +135,7 @@ const DealerRegistration = () => {
       });
 
       const res = await fetch(
-        "https://api.clubpromfg.com/api/dealer-registration",
-        // "http://localhost:5000/api/dealer-registration",
+        `${BASE_URL}/dealer-registration`,
         {
           method: "POST",
           body: formDataObj, // ✅ FormData
@@ -232,7 +232,7 @@ const DealerRegistration = () => {
             </h1>
             <p className="text-gray-200 max-w-2xl text-lg">
               Join the Club Pro Green Grass family with access to exclusive
-              pricing and products backed by an industry leading 5 year warranty
+              pricing and products backed by an industry leading 5 year enclosure warranty
             </p>
           </div>
         </div>

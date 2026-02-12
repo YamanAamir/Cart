@@ -1,6 +1,6 @@
 // src/pages/Contact.jsx
 import { useState } from 'react';
-const BASE_API = "https://api.clubpromfg.com/api"
+import { BASE_URL } from '../utils/api';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -26,7 +26,7 @@ export default function Contact() {
     setStatus({ loading: true, success: false, error: null });
 
     try {
-      const response = await fetch(`${BASE_API}/contact`, {
+      const response = await fetch(`${BASE_URL}/contact`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

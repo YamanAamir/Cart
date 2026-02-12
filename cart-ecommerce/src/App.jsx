@@ -47,14 +47,16 @@ import Contact from "./pages/Contact";
 import OurPolicies from "./pages/OurPolicies";
 import FAQs from "./pages/FAQs";
 import WarrantyRegistration from "./pages/WarrantyRegistration";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
-    
+
     <Routes>
       {/* Public route */}
       <Route path="/login" element={<Login />} />
       <Route path="/dealer-registration" element={<DealerRegistration />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
 
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
@@ -142,6 +144,8 @@ function App() {
             </MainLayout>
           }
         />
+
+
         <Route
           path="/faq"
           element={

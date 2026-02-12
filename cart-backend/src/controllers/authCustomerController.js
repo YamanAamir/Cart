@@ -3,6 +3,7 @@ const prisma = new PrismaClient();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const axios = require('axios');
+const { sendResetEmail } = require('../utils/sendEmail');
 require('dotenv').config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -355,21 +356,85 @@ const login = async (req, res) => {
   }
 };
 
+// const forgot = async (req, res) => {
+//   const { identifier } = req.body;
+
+//   if (!identifier) {
+//     return res.status(400).json({ error: 'Identifier is required' });
+//   }
+
+//   try {
+//     const customer = await prisma.customers.findFirst({
+//       where: { email: identifier  },
+//     });
+//     if (!customer) {
+//       return res.status(404).json({ error: 'Customer not found' });
+//     }
+
+//     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+//     const resetAttempts = await prisma.passwordResetAttempt.count({
+//       where: {
+//         customerId: customer.id,
+//         createdAt: { gte: oneDayAgo },
+//       },
+//     });
+
+//     if (resetAttempts >= 5) {
+//       return res.status(429).json({
+//         error: 'Password reset request limit reached. You can only request a password reset 5 times per day. Please try again tomorrow.',
+//       });
+//     }
+
+//     await prisma.passwordResetAttempt.create({
+//       data: {
+//         customerId: customer.id,
+//       },
+//     });
+
+//     const code = generateCode();
+//     const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+//     // await prisma.verificationCode.create({
+//     //   data: {
+//     //     customerId: customer.id,
+//     //     phone: customer.phone,
+//     //     code,
+//     //     isForReset: true,
+//     //     expiry,
+//     //   },
+//     // });
+
+//     // await sendVerificationWhatsApp(customer.phone, code);
+
+//     res.json({ message: 'Reset code sent to WhatsApp.' });
+//   } catch (error) {
+//     console.error('Forgot password error:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// };
+
 const forgot = async (req, res) => {
   const { identifier } = req.body;
 
   if (!identifier) {
-    return res.status(400).json({ error: 'Identifier is required' });
+    return res.status(400).json({ error: "Identifier is required" });
   }
 
   try {
+    // Determine if identifier is email or phone
+    const isEmail = identifier.includes("@");
+
     const customer = await prisma.customers.findFirst({
-      where: { OR: [{ email: identifier }, { phone: identifier }] },
+      where: isEmail
+        ? { email: identifier }
+        : {} // no phone field in customers yet, need frontend input for phone
     });
+
     if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
+      return res.status(404).json({ error: "Customer not found" });
     }
 
+    // Limit reset attempts
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
     const resetAttempts = await prisma.passwordResetAttempt.count({
       where: {
@@ -378,37 +443,44 @@ const forgot = async (req, res) => {
       },
     });
 
-    if (resetAttempts >= 5) {
-      return res.status(429).json({
-        error: 'Password reset request limit reached. You can only request a password reset 5 times per day. Please try again tomorrow.',
-      });
-    }
+    // if (resetAttempts >= 5) {
+    //   return res.status(429).json({
+    //     error:
+    //       "Password reset request limit reached. Only 5 per day. Try again tomorrow.",
+    //   });
+    // }
 
     await prisma.passwordResetAttempt.create({
-      data: {
-        customerId: customer.id,
-      },
+      data: { customerId: customer.id },
     });
 
-    const code = generateCode();
-    const expiry = new Date(Date.now() + 10 * 60 * 1000);
+    const code = generateCode(); // 6-digit or whatever you use
+    const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
+    // Save code
     await prisma.verificationCode.create({
       data: {
         customerId: customer.id,
-        phone: customer.phone,
+        phone: isEmail ? null : identifier,
         code,
         isForReset: true,
         expiry,
       },
     });
 
-    await sendVerificationWhatsApp(customer.phone, code);
+    // Send code
+    if (isEmail) {
+      // Send via email
+      await sendResetEmail(customer.email, code); // <-- implement this
+    } else {
+      // Send via WhatsApp
+      await sendVerificationWhatsApp(identifier, code);
+    }
 
-    res.json({ message: 'Reset code sent to WhatsApp.' });
+    res.json({ message: `Reset code sent via ${isEmail ? "email" : "WhatsApp"}.` });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Forgot password error:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -427,10 +499,19 @@ const reset = async (req, res) => {
     return res.status(400).json({ error: 'Password must be at least 8 characters' });
   }
 
+
   try {
+    const isEmail = identifier.includes("@");
+
     const customer = await prisma.customers.findFirst({
-      where: { OR: [{ email: identifier }, { phone: identifier }] },
+      where: isEmail
+        ? { email: identifier }
+        : { phone: identifier } // no phone field in customers yet, need frontend input for phone
     });
+
+    // const customer = await prisma.customers.findFirst({
+    //   where: { OR: [{ email: identifier }, { phone: identifier }] },
+    // });
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' });
     }
