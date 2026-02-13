@@ -208,6 +208,10 @@ export default function ProductDetails() {
         "widthIn", // ← added
         "heightIn", // ← added
         "description",
+        "seoTitle",
+        "seoDescription",
+        "seoKeywords",
+        "slug",
       ];
 
       fields.forEach((field) => {
@@ -518,6 +522,54 @@ export default function ProductDetails() {
               disabled={isSubmitting}
               placeholder="e.g. 3.00"
             />
+          </div>
+        </div>
+
+        {/* SEO Settings */}
+        <div className="mt-8 pt-6 border-t">
+          <h3 className="text-xl font-bold mb-4">SEO Settings</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="md:col-span-2">
+              <Label htmlFor="slug">URL Slug</Label>
+              <Input
+                id="slug"
+                value={editedProduct.slug || ""}
+                onChange={(e) => handleFieldChange("slug", e.target.value)}
+                disabled={isSubmitting}
+                placeholder="product-url-slug"
+              />
+            </div>
+            <div>
+              <Label htmlFor="seoTitle">Meta Title</Label>
+              <Input
+                id="seoTitle"
+                value={editedProduct.seoTitle || ""}
+                onChange={(e) => handleFieldChange("seoTitle", e.target.value)}
+                disabled={isSubmitting}
+                placeholder="SEO Title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="seoKeywords">Meta Keywords</Label>
+              <Input
+                id="seoKeywords"
+                value={editedProduct.seoKeywords || ""}
+                onChange={(e) => handleFieldChange("seoKeywords", e.target.value)}
+                disabled={isSubmitting}
+                placeholder="keyword1, keyword2"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Label htmlFor="seoDescription">Meta Description</Label>
+              <Textarea
+                id="seoDescription"
+                rows={3}
+                value={editedProduct.seoDescription || ""}
+                onChange={(e) => handleFieldChange("seoDescription", e.target.value)}
+                disabled={isSubmitting}
+                placeholder="SEO Description"
+              />
+            </div>
           </div>
         </div>
       </Card>

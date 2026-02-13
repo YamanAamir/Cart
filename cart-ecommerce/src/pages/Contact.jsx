@@ -1,6 +1,5 @@
-// src/pages/Contact.jsx
 import { useState } from 'react';
-import { BASE_API } from '../utils/api';
+import SEO from "../components/common/SEO";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -58,6 +57,7 @@ export default function Contact() {
 
   return (
     <div className="bg-gray-50 flex items-center justify-center px-4 py-16 md:py-24 max-w-7xl mx-auto sm:px-6 lg:px-8">
+      <SEO slug="contact" />
       <div className="w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="grid md:grid-cols-2">
           {/* Left - Info / Decoration */}
@@ -66,7 +66,7 @@ export default function Contact() {
               Let's Connect
             </h2>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              Have a question or want to collaborate?  
+              Have a question or want to collaborate?
               Drop us a message and we'll get back to you as soon as possible.
             </p>
 
@@ -77,7 +77,7 @@ export default function Contact() {
                   info@clubpro.com
                 </div>
               </div>
-              
+
             </div>
           </div>
 
@@ -160,8 +160,8 @@ export default function Contact() {
                 className={`
                   w-full py-3.5 px-6 rounded-lg font-medium text-white
                   transition-all duration-300
-                  ${status.loading 
-                    ? 'bg-gray-400 cursor-not-allowed' 
+                  ${status.loading
+                    ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-[#f9c821] hover:bg-[#f8b800] active:scale-[0.98] shadow-md hover:shadow-lg'}
                 `}
               >

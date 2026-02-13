@@ -87,6 +87,10 @@ const createModel = async (req, res) => {
       data: {
         name,
         brand: { connect: { id: parseInt(brandId) } },
+        seoTitle: req.body.seoTitle || null,
+        seoDescription: req.body.seoDescription || null,
+        seoKeywords: req.body.seoKeywords || null,
+        slug: req.body.slug || null,
       },
     });
     res.status(201).json(model);
@@ -108,6 +112,10 @@ const updateModel = async (req, res) => {
         brand: brandId
           ? { connect: { id: parseInt(brandId) } }
           : undefined,
+        seoTitle: req.body.seoTitle !== undefined ? req.body.seoTitle : undefined,
+        seoDescription: req.body.seoDescription !== undefined ? req.body.seoDescription : undefined,
+        seoKeywords: req.body.seoKeywords !== undefined ? req.body.seoKeywords : undefined,
+        slug: req.body.slug !== undefined ? req.body.slug : undefined,
       },
     });
     res.json(model);
@@ -147,6 +155,33 @@ const bulkDeleteModels = async (req, res) => {
   }
 };
 
+const getModelBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const model = await prisma.model.findFirst({
+      where: {
+        slug: slug,
+      },
+      include: {
+        brand: true,
+        products: {
+          include: {
+            productType: true,
+          },
+        },
+      },
+    });
+
+    if (!model) {
+      return res.status(404).json({ message: "Model not found" });
+    }
+
+    res.json(model);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   getModels,
   getModel,
@@ -155,4 +190,5 @@ module.exports = {
   updateModel,
   deleteModel,
   bulkDeleteModels,
+  getModelBySlug,
 };

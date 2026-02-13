@@ -101,9 +101,13 @@ model Product {
   lengthIn    Decimal  @db.Decimal(8, 2)
   widthIn     Decimal  @db.Decimal(8, 2)
   heightIn    Decimal  @db.Decimal(8, 2)
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  description  String
+  seoTitle     String?  @db.VarChar(255)
+  seoDescription String?  @db.Text
+  seoKeywords    String?  @db.Text
+  slug         String?  @unique @db.VarChar(255)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Composite unique key for upsert
   @@unique([name, brandId, modelId, typeId, color])
@@ -126,6 +130,11 @@ model Model {
 
   @@unique([name, brandId])
   @@index([brandId], map: "Model_brandId_fkey")
+
+  seoTitle       String?  @db.VarChar(255)
+  seoDescription String?  @db.Text
+  seoKeywords    String?  @db.Text
+  slug           String?  @unique @db.VarChar(255)
 }
 
 model Brand {
@@ -135,8 +144,14 @@ model Brand {
   updatedAt DateTime? @updatedAt
   path      String?
   logo      String?
+  imgAlt    String?
   models    Model[]
   products  Product[]
+
+  seoTitle       String?  @db.VarChar(255)
+  seoDescription String?  @db.Text
+  seoKeywords    String?  @db.Text
+  slug           String?  @unique @db.VarChar(255)
 }
 
 model DealerRegistration {
@@ -250,4 +265,14 @@ enum DealerStatus {
   pending
   approved
   rejected
+}
+
+model PageSeo {
+  id             Int      @id @default(autoincrement())
+  pageName       String   @unique @db.VarChar(100) // e.g., 'home', 'shop', 'contact'
+  seoTitle       String?  @db.VarChar(255)
+  seoDescription String?  @db.Text
+  seoKeywords    String?  @db.Text
+  slug           String?  @unique @db.VarChar(255)
+  updatedAt      DateTime @updatedAt
 }

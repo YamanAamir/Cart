@@ -21,6 +21,11 @@ export default function EditBrand() {
   const [brand, setBrand] = useState({
     name: "",
     logo: "", // current logo URL
+    
+    seoTitle: "",
+    seoDescription: "",
+    seoKeywords: "",
+    slug: "",
   });
 
   const [previewLogo, setPreviewLogo] = useState(""); // for new uploaded image preview
@@ -39,6 +44,10 @@ export default function EditBrand() {
         setBrand({
           name: brandData.name || "",
           logo: brandData.logo || "",
+          seoTitle: brandData.seoTitle || "",
+          seoDescription: brandData.seoDescription || "",
+          seoKeywords: brandData.seoKeywords || "",
+          slug: brandData.slug || "",
         });
         setPreviewLogo(brandData.logo || "");
       } catch (err) {
@@ -105,6 +114,10 @@ export default function EditBrand() {
       if (newLogoFile) {
         formData.append("logo", newLogoFile); // field name must match multer: .single('logo')
       }
+      formData.append("seoTitle", brand.seoTitle || "");
+      formData.append("seoDescription", brand.seoDescription || "");
+      formData.append("seoKeywords", brand.seoKeywords || "");
+      formData.append("slug", brand.slug || "");
 
       await api.put(`/brands/${id}`, formData, {
         headers: {
@@ -126,8 +139,9 @@ export default function EditBrand() {
     }
   };
 
-  const handleNameChange = (e) => {
-    setBrand((prev) => ({ ...prev, name: e.target.value }));
+  const handleFieldChange = (e) => {
+    const { id, value } = e.target;
+    setBrand((prev) => ({ ...prev, [id]: value }));
   };
 
   if (loading) {
@@ -163,7 +177,7 @@ export default function EditBrand() {
               <Input
                 id="name"
                 value={brand.name}
-                onChange={handleNameChange}
+                onChange={handleFieldChange}
                 placeholder="e.g. Nike"
                 required
               />
@@ -180,7 +194,7 @@ export default function EditBrand() {
               {previewLogo ? (
                 <div className="relative inline-block">
                   <img
-                    src={previewLogo.includes('base64')?previewLogo:`http://localhost:5000${previewLogo}`}
+                    src={previewLogo.includes('base64') ? previewLogo : `http://localhost:5000${previewLogo}`}
                     alt="Brand logo preview"
                     className="h-40 w-auto rounded-lg border object-contain bg-gray-50 shadow-sm"
                   />
@@ -232,6 +246,47 @@ export default function EditBrand() {
               <p className="text-sm text-muted-foreground">
                 Recommended: Square image (e.g. 512x512), PNG or JPG, max 5MB
               </p>
+            </div>
+
+            {/* SEO Section */}
+            <div className="border-t pt-6 space-y-4">
+              <h3 className="text-lg font-semibold">SEO Settings</h3>
+              <div className="space-y-2">
+                <Label htmlFor="slug">URL Slug</Label>
+                <Input
+                  id="slug"
+                  value={brand.slug}
+                  onChange={handleFieldChange}
+                  placeholder="e.g. yamaha-parts"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="seoTitle">SEO Title</Label>
+                <Input
+                  id="seoTitle"
+                  value={brand.seoTitle}
+                  onChange={handleFieldChange}
+                  placeholder="Meta Title"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="seoDescription">SEO Description</Label>
+                <Input
+                  id="seoDescription"
+                  value={brand.seoDescription}
+                  onChange={handleFieldChange}
+                  placeholder="Meta Description"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="seoKeywords">SEO Keywords</Label>
+                <Input
+                  id="seoKeywords"
+                  value={brand.seoKeywords}
+                  onChange={handleFieldChange}
+                  placeholder="keyword1, keyword2"
+                />
+              </div>
             </div>
 
             {/* Submit Buttons */}

@@ -83,13 +83,13 @@ const allBrand = async (req, res) => {
 
 // Create brand
 const createBrand = async (req, res) => {
-  const { name } = req.body;
+  const { name, imgAlt } = req.body;
 
   try {
     let logoPath = null;
-  if (req.file) {
-    logoPath = `/uploads/brands/${req.file.filename}`;
-  }
+    if (req.file) {
+      logoPath = `/uploads/brands/${req.file.filename}`;
+    }
 
     const slug = name
       .toLowerCase()
@@ -100,12 +100,17 @@ const createBrand = async (req, res) => {
     const pathField = `/brand/${slug}`;
 
     const brand = await prisma.brand.create({
-    data: {
-      name,
-      path: `/brand/${name}`,
-      logo: logoPath,
-    },
-  });
+      data: {
+        name,
+        path: `/brand/${req.body.slug || slug}`,
+        logo: logoPath,
+        image_alt_name: imgAlt?.trim() || null,
+        seoTitle: req.body.seoTitle || null,
+        seoDescription: req.body.seoDescription || null,
+        seoKeywords: req.body.seoKeywords || null,
+        slug: req.body.slug || slug,
+      },
+    });
 
     res.status(201).json(brand);
   } catch (error) {
@@ -114,10 +119,64 @@ const createBrand = async (req, res) => {
   }
 };
 
-// Update brand
+// // Update brand
+// const updateBrand = async (req, res) => {
+//   const { id } = req.params;
+//   const { name } = req.body;
+
+//   try {
+//     const existingBrand = await prisma.brand.findUnique({
+//       where: { id: parseInt(id) },
+//     });
+
+//     if (!existingBrand) {
+//       return res.status(404).json({ error: "Brand not found" });
+//     }
+
+//     let logoPath = existingBrand.logo;
+
+//     if (req.file) {
+//       // remove old file if exists
+//       if (existingBrand.logo) {
+//         const oldPath = path.join(__dirname, '..', '..', 'uploads', existingBrand.logo.replace('/uploads/', ''));
+//         //               ^ adjust levels if multer.js is deeper
+//         if (fs.existsSync(oldPath)) {
+//           fs.unlinkSync(oldPath);
+//         }
+//       }
+
+//       logoPath = `/uploads/brands/${req.file.filename}`;
+//     }
+
+//     const brand = await prisma.brand.update({
+//       where: { id: parseInt(id) },
+//       data: {
+//         name,
+//         logo: logoPath,
+//         seoTitle: req.body.seoTitle !== undefined ? req.body.seoTitle : existingBrand.seoTitle,
+//         seoDescription: req.body.seoDescription !== undefined ? req.body.seoDescription : existingBrand.seoDescription,
+//         seoKeywords: req.body.seoKeywords !== undefined ? req.body.seoKeywords : existingBrand.seoKeywords,
+//         slug: req.body.slug !== undefined ? req.body.slug : existingBrand.slug,
+//         path: req.body.slug ? `/brand/${req.body.slug}` : existingBrand.path,
+//       },
+//     });
+
+//     res.json(brand);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(400).json({ error: error.message });
+//   }
+// };
 const updateBrand = async (req, res) => {
   const { id } = req.params;
-  const { name } = req.body;
+  const {
+    name,
+    imgAlt,               // ← added
+    seoTitle,
+    seoDescription,
+    seoKeywords,
+    slug
+  } = req.body;
 
   try {
     const existingBrand = await prisma.brand.findUnique({
@@ -130,34 +189,72 @@ const updateBrand = async (req, res) => {
 
     let logoPath = existingBrand.logo;
 
-  if (req.file) {
-    // remove old file if exists
-    if (existingBrand.logo) {
-      const oldPath = path.join(__dirname, '..', '..', 'uploads', existingBrand.logo.replace('/uploads/', ''));
-      //               ^ adjust levels if multer.js is deeper
-      if (fs.existsSync(oldPath)) {
-        fs.unlinkSync(oldPath);
+    if (req.file) {
+      // Remove old logo file if it exists
+      if (existingBrand.logo) {
+        // Be careful with path resolution – adjust '../..' depending on your folder structure
+        const oldFileName = existingBrand.logo.split('/').pop(); // safer than replace
+        const oldPath = path.join(__dirname, '..', '..', 'uploads', 'brands', oldFileName);
+
+        if (fs.existsSync(oldPath)) {
+          fs.unlinkSync(oldPath);
+        }
       }
+
+      logoPath = `/uploads/brands/${req.file.filename}`;
     }
 
-    logoPath = `/uploads/brands/${req.file.filename}`;
-  }
+    // If slug is provided → regenerate path; otherwise keep existing
+    let finalPath = existingBrand.path;
+    let finalSlug = existingBrand.slug;
 
-    const brand = await prisma.brand.update({
+    if (slug !== undefined) {
+      finalSlug = slug.trim();
+      finalPath = `/brand/${finalSlug}`;
+    }
+
+    // Optional: auto-regenerate slug from name if name changed and no slug provided
+    // (uncomment if desired)
+    /*
+    if (name && name.trim() !== existingBrand.name && slug === undefined) {
+      finalSlug = name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '');
+      finalPath = `/brand/${finalSlug}`;
+    }
+    */
+
+    const updatedBrand = await prisma.brand.update({
       where: { id: parseInt(id) },
       data: {
-        name,
+        name: name ? name.trim() : existingBrand.name,
         logo: logoPath,
+        image_alt_name: imgAlt !== undefined ? (imgAlt.trim() || null) : existingBrand.image_alt_name,  // ← added
+        seoTitle: seoTitle !== undefined ? seoTitle : existingBrand.seoTitle,
+        seoDescription: seoDescription !== undefined ? seoDescription : existingBrand.seoDescription,
+        seoKeywords: seoKeywords !== undefined ? seoKeywords : existingBrand.seoKeywords,
+        slug: finalSlug,
+        path: finalPath,
       },
     });
 
-    res.json(brand);
+    return res.json(updatedBrand);
   } catch (error) {
-    console.error(error);
-    res.status(400).json({ error: error.message });
+    console.error("Error updating brand:", error);
+
+    if (error.code === 'P2002') {
+      return res.status(409).json({
+        error: "Conflict – brand with this name or slug already exists"
+      });
+    }
+
+    return res.status(500).json({
+      error: "Failed to update brand"
+    });
   }
 };
-
 // Delete brand(s)
 const deleteBrand = async (req, res) => {
   const { ids } = req.body;
@@ -174,13 +271,13 @@ const deleteBrand = async (req, res) => {
 
     // Delete physical files
     for (const brand of brands) {
-    if (brand.logo) {
-      const filePath = path.join(__dirname, '..', '..', 'uploads', brand.logo.replace('/uploads/', ''));
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
+      if (brand.logo) {
+        const filePath = path.join(__dirname, '..', '..', 'uploads', brand.logo.replace('/uploads/', ''));
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
       }
     }
-  }
 
     const deleted = await prisma.brand.deleteMany({
       where: { id: { in: ids } },
@@ -199,7 +296,10 @@ const getBrandBySlug = async (req, res) => {
 
     const brand = await prisma.brand.findFirst({
       where: {
-        path: `/brand/${slug}`,
+        OR: [
+          { slug: slug },
+          { path: `/brand/${slug}` }
+        ]
       },
       include: {
         models: true,

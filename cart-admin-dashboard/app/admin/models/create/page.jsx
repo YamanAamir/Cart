@@ -28,6 +28,10 @@ import api from "@/lib/api";
 const modelSchema = z.object({
   name: z.string().min(1, "Model name is required").trim(),
   brandId: z.string().min(1, "Please select a brand"),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  seoKeywords: z.string().optional(),
+  slug: z.string().optional(),
 });
 
 export default function AddModels() {
@@ -40,6 +44,10 @@ export default function AddModels() {
     defaultValues: {
       name: "",
       brandId: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      slug: "",
     },
   });
 
@@ -64,6 +72,10 @@ export default function AddModels() {
       await api.post("/models", {
         name: data.name.trim(),
         brandId: Number(data.brandId),
+        seoTitle: data.seoTitle || null,
+        seoDescription: data.seoDescription || null,
+        seoKeywords: data.seoKeywords || null,
+        slug: data.slug || null,
       });
 
       toast.success("Model created successfully!");
@@ -130,6 +142,63 @@ export default function AddModels() {
                     </FormItem>
                   )}
                 />
+
+                {/* SEO Section */}
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="text-lg font-semibold">SEO Settings</h3>
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL Slug</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. ds-parts" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Meta Title" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Description</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Meta Description" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoKeywords"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Keywords</FormLabel>
+                        <FormControl>
+                          <Input placeholder="keyword1, keyword2" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <Button
                   type="submit"

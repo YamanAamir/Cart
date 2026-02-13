@@ -6,7 +6,8 @@ const {
   updateModel,
   deleteModel,
   bulkDeleteModels,
-  allModel
+  allModel,
+  getModelBySlug
 } = require('../controllers/modelController');
 
 const router = express.Router();
@@ -15,9 +16,10 @@ const router = express.Router();
 router.get('/models', getModels);
 router.get('/all-models', allModel);
 router.get('/models/:id', getModel);
+router.get('/models/slug/:slug', getModelBySlug);
 router.post('/models', createModel);
 router.put('/models/:id', updateModel);
 router.delete('/models/:id', deleteModel);
-router.post('/bulk-delete-models',bulkDeleteModels );
+router.post('/bulk-delete-models', bulkDeleteModels);
 
 module.exports = router;

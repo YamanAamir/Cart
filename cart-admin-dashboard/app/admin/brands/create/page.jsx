@@ -22,6 +22,11 @@ import { X } from "lucide-react";
 
 const brandSchema = z.object({
   name: z.string().min(1, "Brand name is required").trim(),
+  imgAlt: z.string().optional(),
+  seoTitle: z.string().optional(),
+  seoDescription: z.string().optional(),
+  seoKeywords: z.string().optional(),
+  slug: z.string().optional(),
 });
 
 export default function AddBrands() {
@@ -34,7 +39,13 @@ export default function AddBrands() {
     resolver: zodResolver(brandSchema),
     defaultValues: {
       name: "",
+      imgAlt: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      slug: "",
     },
+
   });
 
   const handleFileChange = (e) => {
@@ -65,6 +76,11 @@ export default function AddBrands() {
       const formData = new FormData();
       formData.append("name", data.name.trim());
       formData.append("logo", logoFile);
+      formData.append("imgAlt", data.imgAlt.trim());
+      if (data.seoTitle) formData.append("seoTitle", data.seoTitle);
+      if (data.seoDescription) formData.append("seoDescription", data.seoDescription);
+      if (data.seoKeywords) formData.append("seoKeywords", data.seoKeywords);
+      if (data.slug) formData.append("slug", data.slug);
 
       await api.post("/brands", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -177,6 +193,81 @@ export default function AddBrands() {
 
                   <FormMessage />
                 </FormItem>
+                <FormField
+                  control={form.control}
+                  name="imgAlt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Logo Alt Text (Accessibility & SEO)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="e.g. Yamaha official logo, Club Car golf cart emblem"
+                          {...field}
+                        />
+                      </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Describe the logo briefly for screen readers and search engines
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {/* SEO Section */}
+                <div className="border-t pt-6 space-y-4">
+                  <h3 className="text-lg font-semibold">SEO Settings</h3>
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>URL Slug</FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. yamaha-parts" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoTitle"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Title</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Meta Title" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Description</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Meta Description" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="seoKeywords"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>SEO Keywords</FormLabel>
+                        <FormControl>
+                          <Input placeholder="keyword1, keyword2" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 {/* Submit Button */}
                 <Button

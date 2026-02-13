@@ -20,6 +20,10 @@ const createProduct = async (req, res) => {
       widthIn,
       heightIn,
       description,
+      seoTitle,
+      seoDescription,
+      seoKeywords,
+      slug,
     } = req.body;
 
     // Required fields validation
@@ -96,6 +100,10 @@ const createProduct = async (req, res) => {
         widthIn: parsedWidthIn,
         heightIn: parsedHeightIn,
         description: description?.trim() || null,
+        seoTitle: seoTitle?.trim() || null,
+        seoDescription: seoDescription?.trim() || null,
+        seoKeywords: seoKeywords?.trim() || null,
+        slug: slug?.trim() || null,
         imageOne: imageFields.imageOne,
         imageTwo: imageFields.imageTwo,
         imageThree: imageFields.imageThree,
@@ -151,6 +159,10 @@ const updateProduct = async (req, res) => {
     widthIn,
     heightIn,
     description,
+    seoTitle,
+    seoDescription,
+    seoKeywords,
+    slug,
   } = req.body;
 
   try {
@@ -177,6 +189,10 @@ const updateProduct = async (req, res) => {
         imageTwo: true,
         imageThree: true,
         imageFour: true,
+        seoTitle: true,
+        seoDescription: true,
+        seoKeywords: true,
+        slug: true,
       },
     });
 
@@ -267,6 +283,10 @@ const updateProduct = async (req, res) => {
     if (widthIn !== undefined) updateData.widthIn = widthIn ? parseFloat(widthIn) : null;
     if (heightIn !== undefined) updateData.heightIn = heightIn ? parseFloat(heightIn) : null;
     if (description !== undefined) updateData.description = description?.trim() || null;
+    if (seoTitle !== undefined) updateData.seoTitle = seoTitle?.trim() || null;
+    if (seoDescription !== undefined) updateData.seoDescription = seoDescription?.trim() || null;
+    if (seoKeywords !== undefined) updateData.seoKeywords = seoKeywords?.trim() || null;
+    if (slug !== undefined) updateData.slug = slug?.trim() || null;
 
     // Always include current (possibly updated) image paths
     Object.assign(updateData, currentImages);
@@ -356,6 +376,9 @@ const getAllProductsPagination = async (req, res) => {
       ...(search && {
         OR: [
           { name: { contains: search } },
+          { seoTitle: { contains: search } },
+          { seoKeywords: { contains: search } },
+          { slug: { contains: search } },
           { brand: { name: { contains: search } } },
           { model: { name: { contains: search } } },
         ],
@@ -427,6 +450,31 @@ const getProductById = async (req, res) => {
     res.status(200).json(product);
   } catch (error) {
     console.error("Error fetching product:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// ==================== GET BY SLUG ====================
+const getProductBySlug = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    const product = await prisma.product.findUnique({
+      where: { slug: slug },
+      include: {
+        brand: { select: { id: true, name: true } },
+        model: { select: { id: true, name: true } },
+        productType: { select: { id: true, name: true } },
+      },
+    });
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.status(200).json(product);
+  } catch (error) {
+    console.error("Error fetching product by slug:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -518,6 +566,10 @@ const importProductsFromCSV = async (req, res) => {
         lengthIn,
         widthIn,
         heightIn,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
+        slug,
       } = row;
 
       if (!name || !brand || !model || !type) {
@@ -601,6 +653,10 @@ const importProductsFromCSV = async (req, res) => {
             lengthIn: parseFloat(lengthIn),
             widthIn: parseFloat(widthIn),
             heightIn: parseFloat(heightIn),
+            seoTitle: seoTitle?.trim() || null,
+            seoDescription: seoDescription?.trim() || null,
+            seoKeywords: seoKeywords?.trim() || null,
+            slug: slug?.trim() || null,
             imageOne: img1?.trim() || null,
             imageTwo: img2?.trim() || null,
             imageThree: img3?.trim() || null,
@@ -622,6 +678,10 @@ const importProductsFromCSV = async (req, res) => {
             lengthIn: parseFloat(lengthIn),
             widthIn: parseFloat(widthIn),
             heightIn: parseFloat(heightIn),
+            seoTitle: seoTitle?.trim() || null,
+            seoDescription: seoDescription?.trim() || null,
+            seoKeywords: seoKeywords?.trim() || null,
+            slug: slug?.trim() || null,
             imageOne: img1?.trim() || null,
             imageTwo: img2?.trim() || null,
             imageThree: img3?.trim() || null,
@@ -659,6 +719,7 @@ module.exports = {
   bulkDeleteProducts,
   getAllProductsPagination,
   getProductById,
+  getProductBySlug,
   getLatestProducts,
   toggleProductStock, // renamed for clarity
 };

@@ -6,6 +6,7 @@ const {
   bulkDeleteProducts,
   getAllProductsPagination,
   getProductById,
+  getProductBySlug,
   getLatestProducts,
   importProductsFromCSV,
   // toggleProductField,
@@ -62,6 +63,9 @@ router.get('/products', getAllProductsPagination); // Reusing the same logic, no
 
 // Get single product by ID
 router.get('/product/:id', getProductById);
+
+// Get single product by Slug
+router.get('/product/slug/:slug', getProductBySlug);
 
 // Get latest products (homepage/feature)
 router.get('/product/latest', getLatestProducts);

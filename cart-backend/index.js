@@ -36,6 +36,7 @@ const contactRoutes = require("./src/routes/contactRoutes");
 // const checkoutRoutes = require("./src/routes/checkoutRoutes");
 const warrantyRoutes = require("./src/routes/warrantyRoutes");
 const statsRoutes = require("./src/routes/statsRoutes");
+const seoRoutes = require("./src/routes/seoRoutes");
 
 
 
@@ -44,7 +45,7 @@ const statsRoutes = require("./src/routes/statsRoutes");
 // app.use("/api", stripeRoutes);
 
 
-const PORT = process.env.PORT||5000;
+const PORT = process.env.PORT || 5000;
 
 // ---------- CORS: Read URLs from .env ----------
 const rawOrigins = process.env.FRONTEND_URLS;
@@ -102,6 +103,7 @@ app.use("/api", customerRoutes);
 app.use("/api", profileRoutes);
 app.use("/api", contactRoutes);
 app.use("/api", statsRoutes);
+app.use("/api/seo", seoRoutes);
 // app.use("/api", checkoutRoutes);
 
 

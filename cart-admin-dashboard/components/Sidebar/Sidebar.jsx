@@ -115,6 +115,11 @@ export default function Sidebar() {
             { name: 'Stats Cards List', path: '/admin/stats-cards/list' },
           ],
         },
+        {
+          name: 'SEO Management',
+          path: '/admin/seo',
+          icon: PanelTop,
+        },
       ]
     },
 

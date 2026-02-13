@@ -3,10 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { BASE_API } from "../utils/api";
 import { ArrowLeft, ArrowRight, ChevronRight } from "lucide-react";
 import { useCart } from "../context/CartContext";
-
+import SEO from "../components/common/SEO";
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,11 +16,13 @@ export default function ProductDetail() {
 
   const { addToCart } = useCart();
 
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await fetch(`${BASE_API}/product/${id}`);
+        const isId = /^\d+$/.test(slug);
+        const endpoint = isId ? `/product/${slug}` : `/product/slug/${slug}`;
+
+        const res = await fetch(`${BASE_API}${endpoint}`);
         if (!res.ok) throw new Error("Failed to load product");
         const data = await res.json();
         setProduct(data);
@@ -32,7 +34,7 @@ export default function ProductDetail() {
     };
 
     fetchProduct();
-  }, [id]);
+  }, [slug]);
 
   if (loading) {
     return (
@@ -92,6 +94,7 @@ export default function ProductDetail() {
 
   return (
     <>
+      <SEO data={product} />
       <div className="bg-[#f9c821] border-b border-gray-200 sticky top-45 z-10 mb-6 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between text-sm ">
           <nav className="flex items-center gap-1.5 text-white">
@@ -117,7 +120,7 @@ export default function ProductDetail() {
             <div className="relative bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
               <img
                 src={`https://api.clubpromfg.com/uploads/products/${images[activeImage]}`}
-                alt={product.name}
+                alt={product.seoTitle || product.name}
                 className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-cover transition-all duration-300"
               />
 
@@ -158,13 +161,13 @@ export default function ProductDetail() {
                     key={index}
                     onClick={() => setActiveImage(index)}
                     className={`border-2 rounded-lg overflow-hidden w-20 h-20 ${activeImage === index
-                        ? "border-[#f9c821]"
-                        : "border-transparent"
+                      ? "border-[#f9c821]"
+                      : "border-transparent"
                       }`}
                   >
                     <img
                       src={`https://api.clubpromfg.com/uploads/products/${img}`}
-                      alt=""
+                      alt={`${product.seoTitle || product.name} thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
@@ -270,8 +273,8 @@ export default function ProductDetail() {
               }
               }
               className={`w-full py-5 text-xl font-bold rounded-xl transition shadow-lg ${added
-                  ? "bg-green-500 text-white"
-                  : "bg-[#f9c821] hover:bg-yellow-500 text-white"
+                ? "bg-green-500 text-white"
+                : "bg-[#f9c821] hover:bg-yellow-500 text-white"
                 }`}
             >
               {added ? "Added to Cart ✓" : "Add to Cart"}

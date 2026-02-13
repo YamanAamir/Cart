@@ -36,6 +36,15 @@ const productSchema = z.object({
   modelId: z.string().min(1, "Model is required"),
   typeId: z.string().min(1, "Product type is required"),
   color: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  weightLb: z.coerce.number().min(0).optional(),
+  lengthIn: z.coerce.number().min(0).optional(),
+  widthIn: z.coerce.number().min(0).optional(),
+  heightIn: z.coerce.number().min(0).optional(),
+  seoTitle: z.string().max(255).optional().nullable(),
+  seoDescription: z.string().optional().nullable(),
+  seoKeywords: z.string().optional().nullable(),
+  slug: z.string().min(1, "Slug is required").trim(),
   images: z
     .array(z.instanceof(File))
     .max(4, "Maximum 4 images allowed")
@@ -67,15 +76,32 @@ export default function AddProduct() {
       typeId: "",
       color: "",
       images: [],
-      lengthIn:"",
-      widthIn:"",
-      heightIn:"",
-      description:"",
+      lengthIn: "",
+      widthIn: "",
+      heightIn: "",
+      weightLb: "",
+      description: "",
+      seoTitle: "",
+      seoDescription: "",
+      seoKeywords: "",
+      slug: "",
     },
   });
 
+  const watchedName = form.watch("name");
   const watchedTypeId = form.watch("typeId");
   const watchedImages = form.watch("images");
+
+  // Auto-generate slug from name
+  useEffect(() => {
+    if (watchedName) {
+      const slug = watchedName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+      form.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [watchedName, form]);
 
   // Update image previews when files change
   useEffect(() => {
@@ -161,6 +187,15 @@ export default function AddProduct() {
       formData.append("modelId", Number(data.modelId));
       formData.append("typeId", Number(data.typeId));
       if (data.color) formData.append("color", data.color);
+      if (data.description) formData.append("description", data.description);
+      if (data.weightLb) formData.append("weightLb", parseFloat(data.weightLb));
+      if (data.lengthIn) formData.append("lengthIn", parseFloat(data.lengthIn));
+      if (data.widthIn) formData.append("widthIn", parseFloat(data.widthIn));
+      if (data.heightIn) formData.append("heightIn", parseFloat(data.heightIn));
+      if (data.seoTitle) formData.append("seoTitle", data.seoTitle);
+      if (data.seoDescription) formData.append("seoDescription", data.seoDescription);
+      if (data.seoKeywords) formData.append("seoKeywords", data.seoKeywords);
+      if (data.slug) formData.append("slug", data.slug);
 
       // Append images (up to 4)
       if (data.images && data.images.length > 0) {
@@ -182,7 +217,7 @@ export default function AddProduct() {
       console.error("Error creating product:", error);
       toast.error(
         error.response?.data?.message ||
-          "Failed to create product. Please check all fields and images."
+        "Failed to create product. Please check all fields and images."
       );
     } finally {
       setIsSubmitting(false);
@@ -501,10 +536,10 @@ export default function AddProduct() {
                                 !watchedBrandId
                                   ? "Select a brand first"
                                   : loadingModels
-                                  ? "Loading models..."
-                                  : models.length === 0
-                                  ? "No models available"
-                                  : "Select a model"
+                                    ? "Loading models..."
+                                    : models.length === 0
+                                      ? "No models available"
+                                      : "Select a model"
                               }
                             />
                           </SelectTrigger>
@@ -579,6 +614,65 @@ export default function AddProduct() {
                     )}
                   />
                 )}
+
+                {/* SEO Section */}
+                <div className="border-t pt-6">
+                  <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+                  <div className="grid grid-cols-1 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>URL Slug</FormLabel>
+                          <FormControl>
+                            <Input placeholder="product-url-slug" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="seoTitle"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meta Title</FormLabel>
+                          <FormControl>
+                            <Input placeholder="SEO Title" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="seoDescription"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meta Description</FormLabel>
+                          <FormControl>
+                            <Input placeholder="SEO Description" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="seoKeywords"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Meta Keywords</FormLabel>
+                          <FormControl>
+                            <Input placeholder="keyword1, keyword2" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
 
                 <Button
                   type="submit"
