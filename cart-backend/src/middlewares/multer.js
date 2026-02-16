@@ -85,10 +85,10 @@ const upload = {
     limits: { fileSize: 8 * 1024 * 1024 },
     fileFilter: imageFilter,
   }).fields([
-    { name: 'imageOne',   maxCount: 1 },
-    { name: 'imageTwo',   maxCount: 1 },
+    { name: 'imageOne', maxCount: 1 },
+    { name: 'imageTwo', maxCount: 1 },
     { name: 'imageThree', maxCount: 1 },
-    { name: 'imageFour',  maxCount: 1 },
+    { name: 'imageFour', maxCount: 1 },
   ]),
 
   // ── Dealer Registration ── resale certificate (PDF or image)
@@ -97,6 +97,13 @@ const upload = {
     limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
     fileFilter: documentFilter,
   }).single('resaleCertificate'),
+
+  // ── Hero Section ── single hero image
+  heroImage: multer({
+    storage: createStorage('hero'),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+    fileFilter: imageFilter,
+  }).single('image'),
 };
 
 module.exports = { upload };

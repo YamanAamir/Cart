@@ -21,11 +21,12 @@ export default function EditBrand() {
   const [brand, setBrand] = useState({
     name: "",
     logo: "", // current logo URL
-    
+
     seoTitle: "",
     seoDescription: "",
     seoKeywords: "",
     slug: "",
+    imgAlt: "",
   });
 
   const [previewLogo, setPreviewLogo] = useState(""); // for new uploaded image preview
@@ -48,6 +49,7 @@ export default function EditBrand() {
           seoDescription: brandData.seoDescription || "",
           seoKeywords: brandData.seoKeywords || "",
           slug: brandData.slug || "",
+          imgAlt: brandData.imgAlt || "",
         });
         setPreviewLogo(brandData.logo || "");
       } catch (err) {
@@ -118,6 +120,7 @@ export default function EditBrand() {
       formData.append("seoDescription", brand.seoDescription || "");
       formData.append("seoKeywords", brand.seoKeywords || "");
       formData.append("slug", brand.slug || "");
+      formData.append("imgAlt", brand.imgAlt || "");
 
       await api.put(`/brands/${id}`, formData, {
         headers: {
@@ -246,6 +249,16 @@ export default function EditBrand() {
               <p className="text-sm text-muted-foreground">
                 Recommended: Square image (e.g. 512x512), PNG or JPG, max 5MB
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="imgAlt">Logo Alt Text (SEO)</Label>
+              <Input
+                id="imgAlt"
+                value={brand.imgAlt}
+                onChange={handleFieldChange}
+                placeholder="e.g. Yamaha logo white background"
+              />
             </div>
 
             {/* SEO Section */}

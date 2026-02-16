@@ -107,6 +107,15 @@ export default function Sidebar() {
           // ],
         },
         {
+          name: 'Hero Sections',
+          path: '/admin/hero-sections',
+          icon: Package,
+          subItems: [
+            { name: 'Create Hero Section', path: '/admin/hero-sections/create' },
+            { name: 'Hero Sections List', path: '/admin/hero-sections/list' },
+          ],
+        },
+        {
           name: 'Stats Cards',
           path: '/admin/stats-cards',
           icon: Package,

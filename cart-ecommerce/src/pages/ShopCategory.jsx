@@ -267,7 +267,7 @@ export default function ShopCategory() {
                     <div className="relative w-full aspect-square overflow-hidden">
                       <img
                         src={`https://api.clubpromfg.com/uploads/products/${product.imageOne || "placeholder.jpg"}`}
-                        alt={product.seoTitle || product.name}
+                        alt={product.imgAltOne || product.seoTitle || product.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform"
                       />
                     </div>

@@ -100,6 +100,7 @@ export default function CategorySidebar() {
               <CategoryItem
                 name={brand.name}
                 logo={`https://api.clubpromfg.com${brand.logo}`}
+                imgAlt={brand.imgAlt}
                 path={brand.path}
                 models={brand.models || []} // ← pass models array!
                 variant="sidebar"
@@ -111,6 +112,7 @@ export default function CategorySidebar() {
         <StaticCategoryItem
           name={utilityBrand.name}
           logo={`https://api.clubpromfg.com${utilityBrand.logo}`}
+          imgAlt={utilityBrand.imgAlt}
           path={utilityBrand.path}
           models={utilityBrand.models || []} // ← pass models array!
           variant="sidebar"
@@ -126,6 +128,7 @@ const StaticCategoryItem = ({
   icon: Icon,
   name,
   logo,
+  imgAlt,
   onClick,
   models = [],
   variant = "sidebar",
@@ -185,7 +188,7 @@ const StaticCategoryItem = ({
               {logo ? (
                 <img
                   src={logo}
-                  alt={name}
+                  alt={imgAlt || name}
                   className="w-full h-full object-contain p-1"
                 />
               ) : Icon ? (
@@ -233,7 +236,7 @@ const StaticCategoryItem = ({
         {logo ? (
           <img
             src={logo}
-            alt={name}
+            alt={imgAlt || name}
             className="w-16 h-11 object-contain p-1.5"
           />
         ) : Icon ? (

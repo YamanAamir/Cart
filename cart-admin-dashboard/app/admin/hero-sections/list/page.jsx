@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {api} from "@/lib/api";
+import api from "@/lib/api";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,10 +32,10 @@ import {
     DialogFooter,
 } from "@/components/ui/dialog";
 
-export default function StatsCardsList() {
+export default function HeroSectionList() {
     const router = useRouter();
 
-    const [cards, setCards] = useState([]);
+    const [heroes, setHeroes] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
@@ -53,10 +53,10 @@ export default function StatsCardsList() {
     const [search, setSearch] = useState("");
 
     /* ---------------- FETCH ---------------- */
-    const fetchStatsCards = async () => {
+    const fetchHeroes = async () => {
         try {
             setLoading(true);
-            const res = await api.get("/stats-cards/list", {
+            const res = await api.get("/hero-section/list", {
                 params: {
                     page: pagination.page,
                     limit: pagination.limit,
@@ -64,22 +64,22 @@ export default function StatsCardsList() {
                 },
             });
 
-            setCards(res.data.data || []);
+            setHeroes(res.data.data || []);
             setPagination(res.data.pagination);
         } catch {
-            toast.error("Failed to fetch stats cards");
+            toast.error("Failed to fetch hero sections");
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchStatsCards();
+        fetchHeroes();
     }, [pagination.page, pagination.limit, search, refresh]);
 
     /* ---------------- ACTIONS ---------------- */
     const handleView = (id) => {
-        router.push(`/admin/stats-cards/${id}`);
+        router.push(`/admin/hero-sections/${id}`);
     };
 
     const handleDelete = (id) => {
@@ -92,9 +92,9 @@ export default function StatsCardsList() {
             setActionLoading(true);
             const ids = singleDeleteId ? [singleDeleteId] : selectedIds;
 
-            await api.post("/stats-cards/bulk-delete", { ids });
+            await api.post("/hero-section/bulk-delete", { ids });
 
-            toast.success("Stats card(s) deleted");
+            toast.success("Hero section(s) deleted");
             setSelectedIds([]);
             setSingleDeleteId(null);
             setRefresh((p) => !p);
@@ -108,12 +108,14 @@ export default function StatsCardsList() {
 
     /* ---------------- SELECTION ---------------- */
     const toggleAll = (checked) => {
-        setSelectedIds(checked ? cards.map((c) => c.id) : []);
+        const value = checked === true;
+        setSelectedIds(value ? heroes.map((h) => h.id) : []);
     };
 
     const toggleOne = (id, checked) => {
+        const value = checked === true;
         setSelectedIds((prev) =>
-            checked ? [...prev, id] : prev.filter((i) => i !== id)
+            value ? [...prev, id] : prev.filter((i) => i !== id)
         );
     };
 
@@ -121,15 +123,15 @@ export default function StatsCardsList() {
         <div className="space-y-6 p-4">
             {/* Header */}
             <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold">Stats Cards</h2>
-                <Button onClick={() => router.push("/admin/stats-cards/create")}>
-                    Add Stats Card
+                <h2 className="text-2xl font-bold">Hero Sections</h2>
+                <Button onClick={() => router.push("/admin/hero-sections/create")}>
+                    Add Hero Section
                 </Button>
             </div>
 
             {/* Search */}
             <Input
-                placeholder="Search by title or value..."
+                placeholder="Search by title..."
                 value={search}
                 onChange={(e) => {
                     setSearch(e.target.value);
@@ -157,38 +159,47 @@ export default function StatsCardsList() {
                                 <TableHead className="w-10">
                                     <Checkbox
                                         checked={
-                                            selectedIds.length === cards.length && cards.length > 0
+                                            selectedIds.length === heroes.length &&
+                                            heroes.length > 0
                                         }
                                         onCheckedChange={toggleAll}
                                     />
                                 </TableHead>
                                 <TableHead>ID</TableHead>
                                 <TableHead>Title</TableHead>
-                                <TableHead>Value</TableHead>
+                                <TableHead>Active</TableHead>
+                                <TableHead>Created</TableHead>
                                 <TableHead>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
 
                         <TableBody>
-                            {cards.length === 0 ? (
+                            {heroes.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-12">
+                                    <TableCell colSpan={6} className="text-center py-12">
                                         <AlertCircle className="mx-auto mb-2 text-gray-400" />
-                                        No stats cards found
+                                        No hero sections found
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                cards.map((card) => (
-                                    <TableRow key={card.id}>
+                                heroes.map((hero) => (
+                                    <TableRow key={hero.id}>
                                         <TableCell>
                                             <Checkbox
-                                                checked={selectedIds.includes(card.id)}
-                                                onCheckedChange={(c) => toggleOne(card.id, c)}
+                                                checked={selectedIds.includes(hero.id)}
+                                                onCheckedChange={(c) =>
+                                                    toggleOne(hero.id, c)
+                                                }
                                             />
                                         </TableCell>
-                                        <TableCell>{card.id}</TableCell>
-                                        <TableCell>{card.title}</TableCell>
-                                        <TableCell>{card.value}</TableCell>
+                                        <TableCell>{hero.id}</TableCell>
+                                        <TableCell>{hero.title}</TableCell>
+                                        <TableCell>
+                                            {hero.isActive ? "✅ Active" : "❌ Inactive"}
+                                        </TableCell>
+                                        <TableCell>
+                                            {new Date(hero.createdAt).toLocaleDateString()}
+                                        </TableCell>
                                         <TableCell>
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -197,12 +208,16 @@ export default function StatsCardsList() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => handleView(card.id)}>
+                                                    <DropdownMenuItem
+                                                        onClick={() => handleView(hero.id)}
+                                                    >
                                                         View / Edit
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
                                                         className="text-red-600"
-                                                        onClick={() => handleDelete(card.id)}
+                                                        onClick={() =>
+                                                            handleDelete(hero.id)
+                                                        }
                                                     >
                                                         Delete
                                                     </DropdownMenuItem>
@@ -226,16 +241,24 @@ export default function StatsCardsList() {
                                     variant="outline"
                                     disabled={pagination.page === 1}
                                     onClick={() =>
-                                        setPagination((p) => ({ ...p, page: p.page - 1 }))
+                                        setPagination((p) => ({
+                                            ...p,
+                                            page: p.page - 1,
+                                        }))
                                     }
                                 >
                                     Previous
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    disabled={pagination.page === pagination.totalPages}
+                                    disabled={
+                                        pagination.page === pagination.totalPages
+                                    }
                                     onClick={() =>
-                                        setPagination((p) => ({ ...p, page: p.page + 1 }))
+                                        setPagination((p) => ({
+                                            ...p,
+                                            page: p.page + 1,
+                                        }))
                                     }
                                 >
                                     Next
@@ -256,7 +279,10 @@ export default function StatsCardsList() {
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setConfirmOpen(false)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setConfirmOpen(false)}
+                        >
                             Cancel
                         </Button>
                         <Button

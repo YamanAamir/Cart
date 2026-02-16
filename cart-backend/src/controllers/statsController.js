@@ -57,9 +57,9 @@ const getStatsCardById = async (req, res) => {
 
 const createStatsCard = async (req, res) => {
     try {
-        const { title, value } = req.body;
+        const { title, value, link } = req.body;
         const newStatsCard = await prisma.statsCards.create({
-            data: { title, value },
+            data: { title, value, link },
         });
         res.status(201).json({ statsCard: newStatsCard, message: 'Stats card created successfully' });
     }
@@ -73,10 +73,10 @@ const updateStatsCard = async (req, res) => {
 
     try {
         const { id } = req.params;
-        const { title, value } = req.body;
+        const { title, value, link } = req.body;
         const updatedStatsCard = await prisma.statsCards.update({
             where: { id: parseInt(id) },
-            data: { title, value },
+            data: { title, value, link },
         });
         res.status(200).json({ statsCard: updatedStatsCard, message: 'Stats card updated successfully' });
     }

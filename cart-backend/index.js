@@ -37,6 +37,7 @@ const contactRoutes = require("./src/routes/contactRoutes");
 const warrantyRoutes = require("./src/routes/warrantyRoutes");
 const statsRoutes = require("./src/routes/statsRoutes");
 const seoRoutes = require("./src/routes/seoRoutes");
+const heroSectionRoutes = require("./src/routes/heroSectoinRoutes");
 
 
 
@@ -104,6 +105,7 @@ app.use("/api", profileRoutes);
 app.use("/api", contactRoutes);
 app.use("/api", statsRoutes);
 app.use("/api/seo", seoRoutes);
+app.use("/api", heroSectionRoutes);
 // app.use("/api", checkoutRoutes);
 
 

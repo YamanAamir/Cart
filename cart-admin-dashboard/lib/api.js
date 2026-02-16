@@ -16,6 +16,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const formDataApi = axios.create({
+  baseURL: `${baseUrl}/api`,
+  headers: {
+    'Content-Type': 'multipart/form-data',
+  },
+});
+
+formDataApi.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem('DEVICE');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -23,4 +38,12 @@ api.interceptors.response.use(
   }
 );
 
+formDataApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export { api, formDataApi };
 export default api;

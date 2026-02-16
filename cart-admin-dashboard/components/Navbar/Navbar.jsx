@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import api from '@/lib/api';
+import {api} from '@/lib/api';
 
 export default function Navbar() {
   const { user, logout } = useAuth();

@@ -212,6 +212,10 @@ export default function ProductDetails() {
         "seoDescription",
         "seoKeywords",
         "slug",
+        "imgAltOne",
+        "imgAltTwo",
+        "imgAltThree",
+        "imgAltFour",
       ];
 
       fields.forEach((field) => {
@@ -645,6 +649,18 @@ export default function ProductDetails() {
                     </label>
                   )}
                 </div>
+                {imagePreviews[field] && (
+                  <div className="mt-2 text-xs">
+                    <Label className="text-[10px] uppercase text-gray-400">Alt Text</Label>
+                    <Input
+                      placeholder="Image description"
+                      value={editedProduct[`imgAlt${field.replace('image', '')}`] || ""}
+                      onChange={(e) => handleFieldChange(`imgAlt${field.replace('image', '')}`, e.target.value)}
+                      className="h-7 text-xs px-2"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}

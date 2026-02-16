@@ -36,13 +36,21 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full bg-white/10 backdrop-blur-md border-b border-white/30 px-8 py-4 flex items-center justify-between shadow-sm transition-all duration-300">
       {/* Logo */}
-      <Link to="/">
+      {/* <Link to="/">
         <img
           src={Logo}
           alt="Club Pro Golf Logo"
           className="h-16 w-auto object-contain drop-shadow-sm hover:scale-105 transition-transform duration-300"
         />
-      </Link>
+      </Link> */}
+      <div className="flex items-center gap-3">
+        <Link to={"/"} className="flex flex-col justify-center items-center">
+          <img src={Logo} className="w-42 h-12" alt="" />
+          <span className="text-xs mt-1 text-gray-700 text-center">
+            Green Grass and Quick Shop
+          </span>
+        </Link>
+      </div>
 
       {/* Right Actions - User Menu */}
       <div className="relative" ref={dropdownRef}>

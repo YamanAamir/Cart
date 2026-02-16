@@ -92,6 +92,13 @@ export default function ProductDetail() {
     product.imageFour,
   ].filter(Boolean);
 
+  const altTexts = [
+    product.imgAltOne,
+    product.imgAltTwo,
+    product.imgAltThree,
+    product.imgAltFour,
+  ].filter((_, i) => [product.imageOne, product.imageTwo, product.imageThree, product.imageFour][i]);
+
   return (
     <>
       <SEO data={product} />
@@ -120,7 +127,7 @@ export default function ProductDetail() {
             <div className="relative bg-gray-50 rounded-2xl overflow-hidden shadow-lg">
               <img
                 src={`https://api.clubpromfg.com/uploads/products/${images[activeImage]}`}
-                alt={product.seoTitle || product.name}
+                alt={altTexts[activeImage] || product.seoTitle || product.name}
                 className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-cover transition-all duration-300"
               />
 
@@ -167,7 +174,7 @@ export default function ProductDetail() {
                   >
                     <img
                       src={`https://api.clubpromfg.com/uploads/products/${img}`}
-                      alt={`${product.seoTitle || product.name} thumbnail ${index + 1}`}
+                      alt={altTexts[index] || `${product.seoTitle || product.name} thumbnail ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>

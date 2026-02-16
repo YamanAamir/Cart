@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { decodeJwt } from "jose";
-import api from '@/lib/api';
+import {api} from '@/lib/api';
 
 const AuthContext = createContext();
 

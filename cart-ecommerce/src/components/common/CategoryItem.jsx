@@ -5,6 +5,7 @@ export default function CategoryItem({
   icon: Icon,
   name,
   logo,
+  imgAlt,
   onClick,
   models = [],
   variant = "sidebar",
@@ -64,7 +65,7 @@ export default function CategoryItem({
               {logo ? (
                 <img
                   src={logo}
-                  alt={name}
+                  alt={imgAlt || name}
                   className="w-full h-full object-contain p-1"
                 />
               ) : Icon ? (
@@ -112,7 +113,7 @@ export default function CategoryItem({
         {logo ? (
           <img
             src={logo}
-            alt={name}
+            alt={imgAlt || name}
             className="w-16 h-11 object-contain p-1.5"
           />
         ) : Icon ? (

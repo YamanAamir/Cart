@@ -86,9 +86,13 @@ model Product {
   regularPrice Decimal     @db.Decimal(10, 2)
   color        String? // Only used for Enclosure products
   imageOne     String?
+  imgAltOne    String?
   imageTwo     String?
+  imgAltTwo    String?
   imageThree   String?
+  imgAltThree  String?
   imageFour    String?
+  imgAltFour   String?
   brandId      Int
   modelId      Int
   typeId       Int
@@ -98,16 +102,16 @@ model Product {
   productType  ProductType @relation(fields: [typeId], references: [id])
   weightLb     Decimal     @db.Decimal(8, 2) // e.g. 2.50
 
-  lengthIn    Decimal  @db.Decimal(8, 2)
-  widthIn     Decimal  @db.Decimal(8, 2)
-  heightIn    Decimal  @db.Decimal(8, 2)
-  description  String
-  seoTitle     String?  @db.VarChar(255)
+  lengthIn       Decimal  @db.Decimal(8, 2)
+  widthIn        Decimal  @db.Decimal(8, 2)
+  heightIn       Decimal  @db.Decimal(8, 2)
+  description    String
+  seoTitle       String?  @db.VarChar(255)
   seoDescription String?  @db.Text
   seoKeywords    String?  @db.Text
-  slug         String?  @unique @db.VarChar(255)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  slug           String?  @unique @db.VarChar(255)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Composite unique key for upsert
   @@unique([name, brandId, modelId, typeId, color])
@@ -128,13 +132,13 @@ model Model {
   brand     Brand     @relation(fields: [brandId], references: [id])
   products  Product[]
 
+  seoTitle       String? @db.VarChar(255)
+  seoDescription String? @db.Text
+  seoKeywords    String? @db.Text
+  slug           String? @unique @db.VarChar(255)
+
   @@unique([name, brandId])
   @@index([brandId], map: "Model_brandId_fkey")
-
-  seoTitle       String?  @db.VarChar(255)
-  seoDescription String?  @db.Text
-  seoKeywords    String?  @db.Text
-  slug           String?  @unique @db.VarChar(255)
 }
 
 model Brand {
@@ -148,10 +152,10 @@ model Brand {
   models    Model[]
   products  Product[]
 
-  seoTitle       String?  @db.VarChar(255)
-  seoDescription String?  @db.Text
-  seoKeywords    String?  @db.Text
-  slug           String?  @unique @db.VarChar(255)
+  seoTitle       String? @db.VarChar(255)
+  seoDescription String? @db.Text
+  seoKeywords    String? @db.Text
+  slug           String? @unique @db.VarChar(255)
 }
 
 model DealerRegistration {
@@ -243,8 +247,24 @@ model StatsCards {
   id        Int       @id @default(autoincrement())
   title     String    @db.VarChar(255)
   value     String    @db.VarChar(255)
+  link      String?   @db.VarChar(255)
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
+}
+
+model HeroSection {
+  id          Int       @id @default(autoincrement())
+  title       String    @db.VarChar(255)
+  description String?   @db.Text
+  imageUrl    String?   @db.Text
+  imgAlt      String?   @db.VarChar(255)
+  ctaTextOne  String?   @db.VarChar(255)
+  ctaLinkOne  String?   @db.VarChar(255)
+  ctaTextTwo  String?   @db.VarChar(255)
+  ctaLinkTwo  String?   @db.VarChar(255)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @updatedAt
 }
 
 enum OrderStatus {

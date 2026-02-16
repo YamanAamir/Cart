@@ -104,7 +104,7 @@ const createBrand = async (req, res) => {
         name,
         path: `/brand/${req.body.slug || slug}`,
         logo: logoPath,
-        image_alt_name: imgAlt?.trim() || null,
+        imgAlt: imgAlt?.trim() || null,
         seoTitle: req.body.seoTitle || null,
         seoDescription: req.body.seoDescription || null,
         seoKeywords: req.body.seoKeywords || null,
@@ -231,7 +231,7 @@ const updateBrand = async (req, res) => {
       data: {
         name: name ? name.trim() : existingBrand.name,
         logo: logoPath,
-        image_alt_name: imgAlt !== undefined ? (imgAlt.trim() || null) : existingBrand.image_alt_name,  // ← added
+        imgAlt: imgAlt !== undefined ? (imgAlt.trim() || null) : existingBrand.imgAlt,  // ← fixed
         seoTitle: seoTitle !== undefined ? seoTitle : existingBrand.seoTitle,
         seoDescription: seoDescription !== undefined ? seoDescription : existingBrand.seoDescription,
         seoKeywords: seoKeywords !== undefined ? seoKeywords : existingBrand.seoKeywords,

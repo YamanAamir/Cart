@@ -14,7 +14,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import api from "@/lib/api";
+import { api } from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 
 export default function StatsCardDetails() {
@@ -61,7 +61,7 @@ export default function StatsCardDetails() {
     try {
       const updates = {};
 
-      ["title", "value"].forEach((field) => {
+      ["title", "value", "link"].forEach((field) => {
         if (editedCard[field] !== card[field]) {
           updates[field] = editedCard[field];
         }
@@ -136,7 +136,15 @@ export default function StatsCardDetails() {
             disabled={isSubmitting}
           />
         </div>
-
+        <div>
+          <Label htmlFor="link">Link</Label>
+          <Input
+            id="link"
+            value={editedCard.link || ""}
+            onChange={(e) => handleChange("link", e.target.value)}
+            disabled={isSubmitting}
+          />
+        </div>
         <div className="flex justify-end gap-4 pt-6">
           <Button
             variant="outline"

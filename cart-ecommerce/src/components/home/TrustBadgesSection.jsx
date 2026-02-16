@@ -54,6 +54,7 @@ export default function TrustBadgesSection() {
               key={item.id}
               title={item.title}
               value={item.value}
+              link={item.link}
             />
           ))}
         </div>

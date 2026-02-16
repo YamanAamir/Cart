@@ -24,6 +24,10 @@ const createProduct = async (req, res) => {
       seoDescription,
       seoKeywords,
       slug,
+      imgAltOne,
+      imgAltTwo,
+      imgAltThree,
+      imgAltFour,
     } = req.body;
 
     // Required fields validation
@@ -105,9 +109,13 @@ const createProduct = async (req, res) => {
         seoKeywords: seoKeywords?.trim() || null,
         slug: slug?.trim() || null,
         imageOne: imageFields.imageOne,
+        imgAltOne: imgAltOne?.trim() || null,
         imageTwo: imageFields.imageTwo,
+        imgAltTwo: imgAltTwo?.trim() || null,
         imageThree: imageFields.imageThree,
+        imgAltThree: imgAltThree?.trim() || null,
         imageFour: imageFields.imageFour,
+        imgAltFour: imgAltFour?.trim() || null,
       },
       include: {
         brand: { select: { name: true } },
@@ -163,6 +171,10 @@ const updateProduct = async (req, res) => {
     seoDescription,
     seoKeywords,
     slug,
+    imgAltOne,
+    imgAltTwo,
+    imgAltThree,
+    imgAltFour,
   } = req.body;
 
   try {
@@ -189,6 +201,10 @@ const updateProduct = async (req, res) => {
         imageTwo: true,
         imageThree: true,
         imageFour: true,
+        imgAltOne: true,
+        imgAltTwo: true,
+        imgAltThree: true,
+        imgAltFour: true,
         seoTitle: true,
         seoDescription: true,
         seoKeywords: true,
@@ -287,6 +303,10 @@ const updateProduct = async (req, res) => {
     if (seoDescription !== undefined) updateData.seoDescription = seoDescription?.trim() || null;
     if (seoKeywords !== undefined) updateData.seoKeywords = seoKeywords?.trim() || null;
     if (slug !== undefined) updateData.slug = slug?.trim() || null;
+    if (imgAltOne !== undefined) updateData.imgAltOne = imgAltOne?.trim() || null;
+    if (imgAltTwo !== undefined) updateData.imgAltTwo = imgAltTwo?.trim() || null;
+    if (imgAltThree !== undefined) updateData.imgAltThree = imgAltThree?.trim() || null;
+    if (imgAltFour !== undefined) updateData.imgAltFour = imgAltFour?.trim() || null;
 
     // Always include current (possibly updated) image paths
     Object.assign(updateData, currentImages);

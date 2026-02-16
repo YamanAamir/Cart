@@ -45,6 +45,10 @@ const productSchema = z.object({
   seoDescription: z.string().optional().nullable(),
   seoKeywords: z.string().optional().nullable(),
   slug: z.string().min(1, "Slug is required").trim(),
+  imgAltOne: z.string().optional().nullable(),
+  imgAltTwo: z.string().optional().nullable(),
+  imgAltThree: z.string().optional().nullable(),
+  imgAltFour: z.string().optional().nullable(),
   images: z
     .array(z.instanceof(File))
     .max(4, "Maximum 4 images allowed")
@@ -85,6 +89,10 @@ export default function AddProduct() {
       seoDescription: "",
       seoKeywords: "",
       slug: "",
+      imgAltOne: "",
+      imgAltTwo: "",
+      imgAltThree: "",
+      imgAltFour: "",
     },
   });
 
@@ -196,6 +204,10 @@ export default function AddProduct() {
       if (data.seoDescription) formData.append("seoDescription", data.seoDescription);
       if (data.seoKeywords) formData.append("seoKeywords", data.seoKeywords);
       if (data.slug) formData.append("slug", data.slug);
+      if (data.imgAltOne) formData.append("imgAltOne", data.imgAltOne);
+      if (data.imgAltTwo) formData.append("imgAltTwo", data.imgAltTwo);
+      if (data.imgAltThree) formData.append("imgAltThree", data.imgAltThree);
+      if (data.imgAltFour) formData.append("imgAltFour", data.imgAltFour);
 
       // Append images (up to 4)
       if (data.images && data.images.length > 0) {
@@ -464,6 +476,13 @@ export default function AddProduct() {
                               </button>
                               <div className="text-center text-sm mt-1">
                                 Image {index + 1}
+                              </div>
+                              <div className="mt-2">
+                                <Input
+                                  placeholder={`Alt text for image ${index + 1}`}
+                                  {...form.register(`imgAlt${index === 0 ? "One" : index === 1 ? "Two" : index === 2 ? "Three" : "Four"}`)}
+                                  className="text-xs h-7"
+                                />
                               </div>
                             </div>
                           ))}

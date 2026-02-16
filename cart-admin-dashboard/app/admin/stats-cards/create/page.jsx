@@ -23,12 +23,13 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import api from "@/lib/api";
+import {api} from "@/lib/api";
 
 /* ---------------- SCHEMA ---------------- */
 const statsCardSchema = z.object({
     title: z.string().min(1, "Title is required"),
     value: z.string().min(1, "Value is required"),
+    link: z.string().url("Please enter a valid URL"),
 });
 
 export default function AddStatsCard() {
@@ -39,6 +40,7 @@ export default function AddStatsCard() {
         defaultValues: {
             title: "",
             value: "",
+            link: "",
         },
     });
 
@@ -101,6 +103,19 @@ export default function AddStatsCard() {
                                                     placeholder="e.g. Free delivery on all orders"
                                                     {...field}
                                                 />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                     <FormField
+                                    control={form.control}
+                                    name="link"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Link</FormLabel>
+                                            <FormControl>
+                                                <Input placeholder="e.g. https://example.com" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
