@@ -235,113 +235,28 @@ export default function GolfCartBuilder() {
     setCurrentIndex(0);
   }, [allImages.length]);
 
-  const isMultiSelectCategory = (category) => !["Enclosure", "Color"].includes(category);
-
-  const getSelectedForCategory = (category) =>
-    selections.items[category] || (isMultiSelectCategory(category) ? [] : null);
-
-  const isSelected = (category, product) =>
-    isMultiSelectCategory(category)
-      ? (selections.items[category] || []).some((p) => p.id === product.id)
-      : selections.items[category]?.id === product.id;
-
-  // const handleSelect = (category, product) => {
-  //   // setSelectedProduct(product)
-  //   if (isMultiSelectCategory(category)) {
-  //     setSelections((prev) => {
-  //       const current = prev.items[category] || [];
-  //       const exists = current.find((p) => p.id === product.id);
-  //       // Update selectedProduct only if adding
-  //       // setSelectedProduct(!exists ? product : null);
-  //       const updatedCategory = exists
-  //         ? current.filter((p) => p.id !== product.id) // remove
-  //         : [...current, product]; // add
-
-  //       // Update selectedProduct to last clicked item still in array
-  //       const lastSelectedProduct = updatedCategory.length
-  //         ? updatedCategory[updatedCategory.length - 1]
-  //         : null;
-  //       setSelectedProduct(lastSelectedProduct);
-
-  //       return {
-  //         ...prev,
-  //         items: {
-  //           ...prev.items,
-  //           [category]: exists
-  //             ? current.filter((p) => p.id !== product.id)
-  //             : [...current, product],
-  //         },
-  //       };
-  //     });
-  //   } else {
-  //     setSelections((prev) => {
-  //       const isSame = prev.items[category]?.id === product.id;
-  //       // If deselecting, clear selectedProduct
-  //       setSelectedProduct(isSame ? null : product);
-
-  //       return {
-  //         ...prev,
-  //         items: {
-  //           ...prev.items,
-  //           [category]: isSame ? null : product,
-  //         },
-  //       };
-  //     });
-  //     // setSelections((prev) => ({
-  //     //   ...prev,
-  //     //   items: {
-  //     //     ...prev.items,
-  //     //     [category]: prev.items[category]?.id === product.id ? null : product,
-  //     //   },
-  //     // }));
-  //   }
-  // };
+  const isSelected = (category, product) => {
+    const selected = selections.items[category];
+    return selected && String(selected.id) === String(product.id);
+  };
 
   const handleSelect = (category, product) => {
-    if (isMultiSelectCategory(category)) {
-      setSelections((prev) => {
-        const current = prev.items[category] || [];
-        const exists = current.find((p) => p.id === product.id);
+    setSelections((prev) => {
+      const current = prev.items[category];
+      const isSame = current && String(current.id) === String(product.id);
 
-        // Remove or add product
-        const updatedCategory = exists
-          ? current.filter((p) => p.id !== product.id)
-          : [...current, product];
+      // Single select: toggles between selected and null
+      const nextSelection = isSame ? null : product;
+      setSelectedProduct(nextSelection);
 
-        // Update selectedProduct intelligently:
-        // - If added → set it as selectedProduct
-        // - If removed → set last item in updatedCategory or null if empty
-        const lastSelectedProduct = exists
-          ? updatedCategory[updatedCategory.length - 1] || null
-          : product;
-
-        setSelectedProduct(lastSelectedProduct);
-
-        return {
-          ...prev,
-          items: {
-            ...prev.items,
-            [category]: updatedCategory,
-          },
-        };
-      });
-    } else {
-      setSelections((prev) => {
-        const isSame = prev.items[category]?.id === product.id;
-
-        // If deselecting → null, else → product
-        const selected = isSame ? null : product;
-        setSelectedProduct(selected);
-
-        return {
-          ...prev,
-          items: {
-            ...prev.items,
-            [category]: selected,
-          },
-        };
-      });
-    }
+      return {
+        ...prev,
+        items: {
+          ...prev.items,
+          [category]: nextSelection,
+        },
+      };
+    });
   };
 
   const handleSaveBuild = () => {
@@ -368,15 +283,12 @@ export default function GolfCartBuilder() {
   const totalPrice = (
     (selections.model?.price || 0) +
     Object.values(selections.items)
-      .flat()
       .reduce((sum, item) => sum + (item?.price || 0), 0)
   ).toFixed(2);
 
   if (loading && !brand) {
     return <PageLoader />;
   }
-  console.log("selectedProduct", selectedProduct);
-  // console.log("selectedProduct", allImages);
 
 
   return (
@@ -540,8 +452,8 @@ export default function GolfCartBuilder() {
                   key={m.id}
                   onClick={() => setSelectedModel(m)}
                   disabled={loading}
-                  className={`text-xs font-bold px-4 py-2 rounded-lg transition-all border ${selectedModel?.id === m.id
-                    ? "bg-[#f9c821] text-white border-[#f9c821] shadow-lg shadow-[#f9c821]/20"
+                  className={`text-sm font-bold px-4 py-2 rounded-lg transition-all border ${selectedModel?.id === m.id
+                    ? "bg-[#f9c821] text-amber-800 border-[#f9c821] shadow-lg shadow-[#f9c821]/20"
                     : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                     } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
@@ -610,7 +522,7 @@ export default function GolfCartBuilder() {
                                     }`}
                                 >
                                   <div>
-                                    <span className="text-sm font-medium">{product.name}</span>
+                                    <span className="text-base text-black font-medium">{product.name}</span>
                                     {product.color && (
                                       <span className="block text-xs text-gray-500">
                                         {product.color}
@@ -620,11 +532,11 @@ export default function GolfCartBuilder() {
                                       <span className="block text-xs text-red-600">Out of stock</span>
                                     )}
                                   </div>
-                                  <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-3 text-base text-black">
                                     <span className="text-sm font-bold">
                                       ${product.price.toFixed(2)}
                                     </span>
-                                    {active && <ArrowRight className="w-5 h-5 text-[#f9c821]" />}
+                                    {active && <ArrowRight className="w-5 h-5 text-[#e7b203]" />}
                                   </div>
                                 </div>
                               );

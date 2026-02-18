@@ -69,14 +69,24 @@ export default function Contact() {
               Have a question or want to collaborate?
               Drop us a message and we'll get back to you as soon as possible.
             </p>
-
+            <p className="text-gray-600 mb-6">
+              If you experience any technical difficulties, please contact us
+              directly at{" "}
+              <a
+                href="mailto:info@clubpro.com"
+                className="text-[#f9c821]"
+              >
+                info@clubpro.com
+              </a>{" "}
+              or call (123) 456-7890.
+            </p>
             <div className="space-y-6 text-gray-700">
-              <div>
+              {/* <div>
                 <div className="font-medium">Email</div>
                 <div className="text-[#f9c821] hover:underline cursor-pointer">
                   info@clubpro.com
                 </div>
-              </div>
+              </div> */}
 
             </div>
           </div>

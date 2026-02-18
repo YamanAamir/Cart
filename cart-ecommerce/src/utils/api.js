@@ -1,5 +1,6 @@
 export const BASE_API='https://api.clubpromfg.com/api'
 // export const BASE_API = 'http://localhost:5000/api'
+export const BASE_URL = 'https://clubpromfg.com'
 
 async function request(endpoint, options = {}) {
   const response = await fetch(`${BASE_API}${endpoint}`, {
