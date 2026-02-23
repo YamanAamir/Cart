@@ -3,6 +3,7 @@ const { put, del } = require("@vercel/blob");
 const prisma = new PrismaClient();
 const path = require("path");
 const fs = require("fs");
+const fishbowl = require('../services/fishbowlService');
 // ==================== CREATE PRODUCT ====================
 const createProduct = async (req, res) => {
   try {
@@ -30,63 +31,37 @@ const createProduct = async (req, res) => {
       imgAltFour,
     } = req.body;
 
-    // Required fields validation
     if (!name || !regularPrice || !brandId || !modelId || !typeId) {
-      return res.status(400).json({
-        message: "name, regularPrice, brandId, modelId, and typeId are required",
-      });
+      return res.status(400).json({ message: "Required fields missing" });
     }
 
-    // Parse numeric fields safely
     const parsedRegularPrice = parseFloat(regularPrice);
     const parsedSalePrice = salePrice ? parseFloat(salePrice) : null;
     const parsedStock = parseInt(stock, 10);
     const parsedBrandId = parseInt(brandId, 10);
     const parsedModelId = parseInt(modelId, 10);
     const parsedTypeId = parseInt(typeId, 10);
-
     const parsedWeightLb = weightLb ? parseFloat(weightLb) : null;
     const parsedLengthIn = lengthIn ? parseFloat(lengthIn) : null;
     const parsedWidthIn = widthIn ? parseFloat(widthIn) : null;
     const parsedHeightIn = heightIn ? parseFloat(heightIn) : null;
 
-    // Basic numeric validations
+    // Validation
     if (isNaN(parsedRegularPrice) || parsedRegularPrice <= 0) {
-      return res.status(400).json({ message: "regularPrice must be a valid number > 0" });
-    }
-    if (parsedSalePrice !== null && (isNaN(parsedSalePrice) || parsedSalePrice < 0)) {
-      return res.status(400).json({ message: "salePrice must be a non-negative number or null" });
-    }
-    if (isNaN(parsedStock) || parsedStock < 0) {
-      return res.status(400).json({ message: "stock must be a non-negative integer" });
+      return res.status(400).json({ message: "regularPrice must be > 0" });
     }
 
-    // Optional dimension validations (uncomment/adjust strictness as needed)
-    if (parsedWeightLb !== null && (isNaN(parsedWeightLb) || parsedWeightLb < 0)) {
-      return res.status(400).json({ message: "weightLb must be a non-negative number" });
-    }
-    if (parsedLengthIn !== null && (isNaN(parsedLengthIn) || parsedLengthIn <= 0)) {
-      return res.status(400).json({ message: "lengthIn must be a positive number" });
-    }
-    // You can add similar checks for widthIn / heightIn if they are mandatory when provided
-
-    // Handle image uploads
-    const imageFields = {
-      imageOne: null,
-      imageTwo: null,
-      imageThree: null,
-      imageFour: null,
-    };
-
+    const imageFields = { imageOne: null, imageTwo: null, imageThree: null, imageFour: null };
     const uploadedFiles = req.files || [];
     if (uploadedFiles.length > 4) {
-      return res.status(400).json({ message: "Maximum 4 images allowed" });
+      return res.status(400).json({ message: "Max 4 images allowed" });
     }
 
     uploadedFiles.forEach((file, index) => {
-      if (index >= 4) return;
-      const fieldName = `image${index === 0 ? "One" : index === 1 ? "Two" : index === 2 ? "Three" : "Four"}`;
-      imageFields[fieldName] = `/uploads/products/${file.filename}`;
+      if (index < 4) {
+        const field = `image${['One','Two','Three','Four'][index]}`;
+        imageFields[field] = `/uploads/products/${file.filename}`;
+      }
     });
 
     const product = await prisma.product.create({
@@ -94,7 +69,7 @@ const createProduct = async (req, res) => {
         name: name.trim(),
         regularPrice: parsedRegularPrice,
         salePrice: parsedSalePrice,
-        stock: isNaN(parsedStock) ? 0 : parsedStock,
+        stock: parsedStock,
         color: color?.trim() || null,
         brandId: parsedBrandId,
         modelId: parsedModelId,
@@ -104,187 +79,136 @@ const createProduct = async (req, res) => {
         widthIn: parsedWidthIn,
         heightIn: parsedHeightIn,
         description: description?.trim() || null,
-        seoTitle: seoTitle?.trim() || null,
-        seoDescription: seoDescription?.trim() || null,
-        seoKeywords: seoKeywords?.trim() || null,
-        slug: slug?.trim() || null,
-        imageOne: imageFields.imageOne,
-        imgAltOne: imgAltOne?.trim() || null,
-        imageTwo: imageFields.imageTwo,
-        imgAltTwo: imgAltTwo?.trim() || null,
-        imageThree: imageFields.imageThree,
-        imgAltThree: imgAltThree?.trim() || null,
-        imageFour: imageFields.imageFour,
-        imgAltFour: imgAltFour?.trim() || null,
+        seoTitle, seoDescription, seoKeywords, slug,
+        ...imageFields,
+        imgAltOne, imgAltTwo, imgAltThree, imgAltFour,
       },
-      include: {
-        brand: { select: { name: true } },
-        model: { select: { name: true } },
-        productType: { select: { name: true } },
-      },
+      include: { brand: { select: { name: true } }, model: { select: { name: true } }, productType: { select: { name: true } } },
     });
 
-    res.status(201).json({
-      message: "Product created successfully",
-      product,
-    });
+   // ─────────────────────────────────────────────
+// Fishbowl Sync - Start
+let csvData = ''; // declare outside try for catch access
+
+try {
+  const partNumber = `PROD-${product.id}`;
+
+  // Description ko 100% safe banao (blank nahi jaayega)
+  let descriptionValue = product.description?.trim();
+  if (!descriptionValue || descriptionValue.length < 1) {
+    descriptionValue = `Product: ${product.name.trim()} - Imported from e-commerce`;
+  }
+  console.log('[Fishbowl Debug] Final description:', descriptionValue);
+
+  // Special characters clean (Fishbowl strict parser ke liye)
+  descriptionValue = descriptionValue
+    .replace(/"/g, '""')           // escape double quotes
+    .replace(/\r?\n|\r/g, ' ')     // line breaks ko space mein
+    .replace(/,/g, ' ')            // comma ko space mein (CSV break na ho)
+    .trim();
+
+  // Exact Fishbowl import format (tumhare documents se verified)
+  const csvHeader = "PartNumber,PartDescription,PartType,UOM,Price,Weight,Active,ManagePart,POItemType";
+
+  // Row values (sab string mein aur quote wrapped)
+  const rowValues = [
+    partNumber,
+    descriptionValue,
+    "Inventory",                  // Required: Inventory, Non-Inventory, Service, etc.
+    "ea",                       // Required UOM
+    Number(product.salePrice || product.regularPrice || 0).toFixed(2),
+    Number(product.weightLb || 1).toFixed(2),
+    "Y",                         
+    "Y",
+    "Purchase"                      
+  ];
+
+  // CSV row banao with proper quoting
+  const csvRow = rowValues.map(value => {
+    const str = String(value);
+    return `"${str.replace(/"/g, '""')}"`;
+  }).join(',');
+
+  csvData = csvHeader + "\r\n" + csvRow;
+
+  // Debug print (exact CSV jo ja raha hai)
+  console.log('[Fishbowl Debug] Final CSV (line by line):');
+  console.log(csvHeader);
+  console.log(csvRow);
+  console.log('[Fishbowl Debug] Full CSV length:', csvData.length);
+  console.log('[Fishbowl Debug] Full CSV content:');
+  console.log(csvData);
+
+  // Import call
+  const fbResponse = await fishbowl.importPart(csvData);
+
+  console.log('Fishbowl import response:', JSON.stringify(fbResponse, null, 2));
+
+  // Save to Prisma
+  await prisma.product.update({
+    where: { id: product.id },
+    data: { fishbowlPartNumber: partNumber },
+  });
+
+  console.log(`Fishbowl Part synced successfully: ${partNumber}`);
+} catch (fbErr) {
+  console.error('Fishbowl product sync failed details:', {
+    message: fbErr.message,
+    status: fbErr.response?.status,
+    fullError: fbErr.response?.data,
+    csvSent: csvData || 'CSV not defined'
+  });
+}
+
+    res.status(201).json({ message: "Product created", product });
   } catch (error) {
-    console.error("Error creating product:", error);
-    if (error.code === "P2003") {
-      return res.status(400).json({
-        message: "Invalid foreign key: brandId, modelId, or typeId does not exist",
-      });
-    }
-    if (error.code === "P2002") {
-      return res.status(400).json({
-        message: "A product with similar unique constraints already exists",
-      });
-    }
-    res.status(500).json({
-      message: "Failed to create product",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
+    console.error("Create product error:", error);
+    res.status(500).json({ message: "Failed to create product", error: error.message });
   }
 };
-// ==================== BULK CREATE ====================
+// ==================== BULK CREATE ===================
 
 
 // ==================== UPDATE PRODUCT ====================
 const updateProduct = async (req, res) => {
   const { id } = req.params;
-
   const {
-    name,
-    regularPrice,
-    salePrice,
-    stock,
-    color,
-    brandId,
-    modelId,
-    typeId,
-    weightLb,
-    lengthIn,
-    widthIn,
-    heightIn,
-    description,
-    seoTitle,
-    seoDescription,
-    seoKeywords,
-    slug,
-    imgAltOne,
-    imgAltTwo,
-    imgAltThree,
-    imgAltFour,
+    name, regularPrice, salePrice, stock, color, brandId, modelId, typeId,
+    weightLb, lengthIn, widthIn, heightIn, description, seoTitle,
+    seoDescription, seoKeywords, slug, imgAltOne, imgAltTwo, imgAltThree, imgAltFour,
   } = req.body;
 
   try {
     const productId = parseInt(id);
+    const existing = await prisma.product.findUnique({ where: { id: productId } });
+    if (!existing) return res.status(404).json({ message: "Product not found" });
 
-    const existingProduct = await prisma.product.findUnique({
-      where: { id: productId },
-      select: {
-        id: true,
-        name: true,
-        regularPrice: true,
-        salePrice: true,
-        stock: true,
-        color: true,
-        brandId: true,
-        modelId: true,
-        typeId: true,
-        weightLb: true,
-        lengthIn: true,
-        widthIn: true,
-        heightIn: true,
-        description: true,
-        imageOne: true,
-        imageTwo: true,
-        imageThree: true,
-        imageFour: true,
-        imgAltOne: true,
-        imgAltTwo: true,
-        imgAltThree: true,
-        imgAltFour: true,
-        seoTitle: true,
-        seoDescription: true,
-        seoKeywords: true,
-        slug: true,
-      },
-    });
-
-    if (!existingProduct) {
-      return res.status(404).json({ message: "Product not found" });
-    }
-
-    // ───────────────────────────────────────
-    //              Image handling
-    // ───────────────────────────────────────
     const currentImages = {
-      imageOne: existingProduct.imageOne,
-      imageTwo: existingProduct.imageTwo,
-      imageThree: existingProduct.imageThree,
-      imageFour: existingProduct.imageFour,
+      imageOne: existing.imageOne,
+      imageTwo: existing.imageTwo,
+      imageThree: existing.imageThree,
+      imageFour: existing.imageFour,
     };
 
     const imageFields = ["imageOne", "imageTwo", "imageThree", "imageFour"];
-
-    // Named fields approach (recommended)
     for (const field of imageFields) {
       const file = req.files?.[field]?.[0];
-      if (!file) continue;
+      const remove = req.body[`remove_${field}`] === 'true';
 
-      // Delete old file if exists
-      if (currentImages[field]) {
+      if (remove && currentImages[field]) {
         const oldPath = path.join(process.cwd(), "uploads", "products", path.basename(currentImages[field]));
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-      }
-
-      currentImages[field] = `/uploads/products/${file.filename}`;
-    }
-    // const imageFields = ["imageOne", "imageTwo", "imageThree", "imageFour"];
-
-    for (const field of imageFields) {
-      const file = req.files?.[field]?.[0];
-      const removeFlag = req.body[`remove_${field}`];
-
-      // 🔴 If remove flag sent
-      if (removeFlag === "true") {
+        currentImages[field] = null;
+      } else if (file) {
         if (currentImages[field]) {
-          const oldPath = path.join(
-            process.cwd(),
-            "uploads",
-            "products",
-            path.basename(currentImages[field])
-          );
-
+          const oldPath = path.join(process.cwd(), "uploads", "products", path.basename(currentImages[field]));
           if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
         }
-
-        currentImages[field] = null; // set DB value to null
-        continue;
-      }
-
-      // 🟢 If new file uploaded
-      if (file) {
-        if (currentImages[field]) {
-          const oldPath = path.join(
-            process.cwd(),
-            "uploads",
-            "products",
-            path.basename(currentImages[field])
-          );
-
-          if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-        }
-
         currentImages[field] = `/uploads/products/${file.filename}`;
       }
     }
-    // ───────────────────────────────────────
-    //           Build update data
-    // ───────────────────────────────────────
-    const updateData = {};
 
+    const updateData = {};
     if (name !== undefined) updateData.name = name.trim();
     if (regularPrice !== undefined) updateData.regularPrice = parseFloat(regularPrice);
     if (salePrice !== undefined) updateData.salePrice = salePrice ? parseFloat(salePrice) : null;
@@ -293,7 +217,6 @@ const updateProduct = async (req, res) => {
     if (brandId !== undefined) updateData.brandId = parseInt(brandId, 10);
     if (modelId !== undefined) updateData.modelId = parseInt(modelId, 10);
     if (typeId !== undefined) updateData.typeId = parseInt(typeId, 10);
-
     if (weightLb !== undefined) updateData.weightLb = weightLb ? parseFloat(weightLb) : null;
     if (lengthIn !== undefined) updateData.lengthIn = lengthIn ? parseFloat(lengthIn) : null;
     if (widthIn !== undefined) updateData.widthIn = widthIn ? parseFloat(widthIn) : null;
@@ -308,43 +231,32 @@ const updateProduct = async (req, res) => {
     if (imgAltThree !== undefined) updateData.imgAltThree = imgAltThree?.trim() || null;
     if (imgAltFour !== undefined) updateData.imgAltFour = imgAltFour?.trim() || null;
 
-    // Always include current (possibly updated) image paths
     Object.assign(updateData, currentImages);
-
-    // Optional: Add basic validation before update (especially for numeric fields)
-    if ('regularPrice' in updateData && (isNaN(updateData.regularPrice) || updateData.regularPrice <= 0)) {
-      return res.status(400).json({ message: "regularPrice must be > 0" });
-    }
-    if ('salePrice' in updateData && updateData.salePrice !== null && (isNaN(updateData.salePrice) || updateData.salePrice < 0)) {
-      return res.status(400).json({ message: "salePrice must be >= 0 or null" });
-    }
-    // Add similar checks for dimensions if you want strict control
 
     const updatedProduct = await prisma.product.update({
       where: { id: productId },
       data: updateData,
-      include: {
-        brand: { select: { name: true } },
-        model: { select: { name: true } },
-        productType: { select: { name: true } },
-      },
+      include: { brand: { select: { name: true } }, model: { select: { name: true } }, productType: { select: { name: true } } },
     });
 
-    res.status(200).json({
-      message: "Product updated successfully",
-      product: updatedProduct,
-    });
-  } catch (error) {
-    console.error("Error updating product:", error);
-    if (error.code === "P2003") {
-      return res.status(400).json({
-        message: "Invalid foreign key: brandId, modelId, or typeId does not exist",
-      });
+    // ─── Fishbowl Sync on Update ───
+    if (updatedProduct.fishbowlPartNumber) {
+      try {
+        const csvHeader = "PartNumber,Description,UOM,Price,WeightLb,Type,Active,ManagePart";
+        const csvRow = `"${updatedProduct.fishbowlPartNumber}","${updatedProduct.name} - ${updatedProduct.description || ''}","Each",${updatedProduct.salePrice || updatedProduct.regularPrice},${updatedProduct.weightLb || 1},"Inventory","Y","Y"`;
+        const csvData = `${csvHeader}\n${csvRow}`;
+
+        await fishbowl.importPart(csvData);
+        console.log(`Fishbowl Part updated: ${updatedProduct.fishbowlPartNumber}`);
+      } catch (fbErr) {
+        console.error('Fishbowl update sync failed:', fbErr);
+      }
     }
-    res.status(500).json({
-      message: "Failed to update product",
-      error: process.env.NODE_ENV === "development" ? error.message : undefined,
-    });
+
+    res.status(200).json({ message: "Product updated", product: updatedProduct });
+  } catch (error) {
+    console.error("Update product error:", error);
+    res.status(500).json({ message: "Failed to update product", error: error.message });
   }
 };
 
