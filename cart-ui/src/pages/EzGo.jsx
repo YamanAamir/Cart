@@ -17,7 +17,7 @@ export default function GolfCartBuilder() {
     const fetchBrand = async () => {
       // map slug → id (or use slug in DB later)
       const brandMap = {
-        "ez-go": 3,
+        "e-z-go": 3,
         "club-car": 1,
         "yamaha": 2,
       };
@@ -159,7 +159,7 @@ export default function GolfCartBuilder() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center gap-4 text-xs md:text-sm tracking-widest text-gray-500 mb-2"
         >
-          <span className="text-[#f9c821]">HOME</span> / EZ-GO
+          <span className="text-[#f9c821]">HOME</span> / E-Z-GO
         </motion.div>
         <motion.h1
           initial={{ opacity: 0, x: -20 }}
@@ -168,11 +168,11 @@ export default function GolfCartBuilder() {
         >
           <div className="flex items-center gap-2">
             <span className="text-gray-900">Build Your</span>
-            <span className="text-[#f9c821]">EZ-GO</span>
+            <span className="text-[#f9c821]">E-Z-GO</span>
           </div>
           <img
             src={logo}
-            alt="EZ-GO Logo"
+            alt="E-Z-GO Logo"
             className="h-6 md:h-10 object-contain"
           />
         </motion.h1>

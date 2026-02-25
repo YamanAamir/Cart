@@ -15,6 +15,7 @@ export default function ShopCategory() {
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const [selectedBrand, setSelectedBrand] = useState(null);
   const [sortBy, setSortBy] = useState("latest"); // latest, price-low, price-high
@@ -139,7 +140,8 @@ export default function ShopCategory() {
       }
     ]
   };
-
+  // Normal brands without filtering out utility
+  // const normalBrands = [...brands.filter(b => b.id !== utilityBrand.id), utilityBrand];
   const normalBrands = brands.filter(
     (b) => b.name.toLowerCase() !== "utility"
   );
@@ -212,16 +214,32 @@ export default function ShopCategory() {
               })}
               {utilityBrand && (
                 <div className="mb-4">
-                  <div className="px-3 py-2.5 rounded-lg bg-amber-50 text-[#f9c821] font-medium text-sm">Utility</div>
-                  <ul className="mt-2 ml-4 pl-3 border-l-2 border-amber-300 space-y-1">
-                    {utilityBrand.models.map((model) => (
-                      <li key={model.id}>
-                        <Link to={`/shop/${model.brandName}/${model.id}`} className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700">
-                          {model.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                  <div
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="flex justify-between items-center px-3 py-2.5 rounded-lg bg-amber-50 text-[#f9c821] font-medium text-sm cursor-pointer"
+                  >
+                    Utility
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                    />
+                  </div>
+
+                  {/* Dropdown */}
+                  {isOpen && (
+                    <ul className="mt-2 ml-4 pl-3 border-l-2 border-amber-300 space-y-1">
+                      {utilityBrand.models.map((model) => (
+                        <li key={model.id}>
+                          <Link
+                            to={`/shop/${model.brandName}/${model.id}`}
+                            className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700"
+                          >
+                            {model.name}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               )}
             </div>

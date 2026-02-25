@@ -59,7 +59,7 @@ export default function HeroSection() {
               Green Grass
               <br />
               <span className="text-white text-4xl">
-                Build Your EZ-GO, Club Car & Yamaha.
+                Build Your E-Z-GO, Club Car & Yamaha.
               </span>
             </h1>
           </motion.div>
@@ -91,7 +91,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex gap-4 pt-4"
           >
-            <Link to="/brand/ez-go">
+            <Link to="/brand/e-z-go">
               <button className="bg-[#f9c821] hover:bg-[#f9c821]-200 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm transition-all duration-300 transform hover:scale-105 shadow-lg shadow-accent/20">
                 START BUILDING
               </button>
