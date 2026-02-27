@@ -9,6 +9,41 @@ import {
 import { BASE_API } from "../utils/api";
 import SEO from "../components/common/SEO";
 
+const utilityBrand = {
+  "id": 9,
+  "name": "Utility",
+  "createdAt": "2025-12-23T20:19:09.219Z",
+  "updatedAt": "2026-01-19T16:25:56.919Z",
+  "path": "/brand/utility",
+  "logo": "/uploads/brands/1768839956724-109582124.png",
+  "models": [
+    {
+      "id": 29,
+      "name": "Umax",
+      "brandId": 4,
+      "brandName": "Yamaha",
+      "createdAt": "2025-12-22T13:44:20.648Z",
+      "updatedAt": "2025-12-22T13:44:20.648Z"
+    },
+    {
+      "id": 18,
+      "name": "Carryall",
+      "brandId": 1,
+      "brandName": "ClubCar",
+      "createdAt": "2025-12-22T13:43:53.369Z",
+      "updatedAt": "2025-12-22T13:43:53.369Z"
+    },
+    {
+      "id": 19,
+      "name": "Carryall 502",
+      "brandId": 1,
+      "brandName": "ClubCar",
+      "createdAt": "2025-12-22T13:43:59.665Z",
+      "updatedAt": "2025-12-22T13:43:59.665Z"
+    }
+  ]
+};
+
 export default function ShopCategory() {
   const { brandName, modelId } = useParams();
   const [products, setProducts] = useState([]);
@@ -26,6 +61,7 @@ export default function ShopCategory() {
   });
 
   const [showMobileFilter, setShowMobileFilter] = useState(false);
+  const [selectedModelName, setSelectedModelName] = useState(null);
 
   useEffect(() => {
     const fetchBrands = async () => {
@@ -40,6 +76,32 @@ export default function ShopCategory() {
     };
     fetchBrands();
   }, []);
+
+  useEffect(() => {
+    if (modelId && brands.length > 0) {
+      // Find the model name from brands data
+      let foundModelName = null;
+      for (const brand of brands) {
+        if (brand.models && brand.models.length > 0) {
+          const model = brand.models.find(m => m.id === parseInt(modelId));
+          if (model) {
+            foundModelName = model.name;
+            break;
+          }
+        }
+      }
+      // Also check utility brand models
+      if (!foundModelName && utilityBrand.models) {
+        const model = utilityBrand.models.find(m => m.id === parseInt(modelId));
+        if (model) {
+          foundModelName = model.name;
+        }
+      }
+      setSelectedModelName(foundModelName);
+    } else {
+      setSelectedModelName(null);
+    }
+  }, [modelId, brands]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -106,40 +168,6 @@ export default function ShopCategory() {
 
   const SEO_DATA = brandName ? brands.find(b => b.name === brandName) : null;
 
-  const utilityBrand = {
-    "id": 9,
-    "name": "Utility",
-    "createdAt": "2025-12-23T20:19:09.219Z",
-    "updatedAt": "2026-01-19T16:25:56.919Z",
-    "path": "/brand/utility",
-    "logo": "/uploads/brands/1768839956724-109582124.png",
-    "models": [
-      {
-        "id": 29,
-        "name": "Umax",
-        "brandId": 4,
-        "brandName": "Yamaha",
-        "createdAt": "2025-12-22T13:44:20.648Z",
-        "updatedAt": "2025-12-22T13:44:20.648Z"
-      },
-      {
-        "id": 18,
-        "name": "Carryall",
-        "brandId": 1,
-        "brandName": "ClubCar",
-        "createdAt": "2025-12-22T13:43:53.369Z",
-        "updatedAt": "2025-12-22T13:43:53.369Z"
-      },
-      {
-        "id": 19,
-        "name": "Carryall 502",
-        "brandId": 1,
-        "brandName": "ClubCar",
-        "createdAt": "2025-12-22T13:43:59.665Z",
-        "updatedAt": "2025-12-22T13:43:59.665Z"
-      }
-    ]
-  };
   // Normal brands without filtering out utility
   // const normalBrands = [...brands.filter(b => b.id !== utilityBrand.id), utilityBrand];
   const normalBrands = brands.filter(
@@ -162,7 +190,20 @@ export default function ShopCategory() {
             <ChevronRight size={14} />
             <Link to="/shop" className="hover:text-black">Shop</Link>
             <ChevronRight size={14} />
-            <span className="font-medium text-text-white">{categoryTitle}</span>
+            {brandName && (
+              <>
+                <Link to={`/shop/${encodeURIComponent(brandName)}`} className="hover:text-black">
+                  {categoryTitle}
+                </Link>
+                {selectedModelName && (
+                  <>
+                    <ChevronRight size={14} />
+                    <span className="font-medium text-text-white">{selectedModelName}</span>
+                  </>
+                )}
+              </>
+            )}
+            {!brandName && <span className="font-medium text-text-white">{categoryTitle}</span>}
           </nav>
         </div>
       </div>
@@ -200,13 +241,23 @@ export default function ShopCategory() {
                     </div>
                     {brand.models?.length > 0 && isSelected && (
                       <ul className="mt-1 ml-4 pl-3 border-l-2 border-amber-200 space-y-1">
-                        {brand.models.map((model) => (
-                          <li key={model.id}>
-                            <Link to={`/shop/${encodeURIComponent(brand.name)}/${model.id}`} className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700 transition-colors">
-                              {model.name}
-                            </Link>
-                          </li>
-                        ))}
+                        {brand.models.map((model) => {
+                          const isModelSelected = modelId && parseInt(modelId) === model.id;
+                          return (
+                            <li key={model.id}>
+                              <Link 
+                                to={`/shop/${encodeURIComponent(brand.name)}/${model.id}`} 
+                                className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                                  isModelSelected 
+                                    ? "bg-amber-50 text-amber-800 font-medium" 
+                                    : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
+                                }`}
+                              >
+                                {model.name}
+                              </Link>
+                            </li>
+                          );
+                        })}
                       </ul>
                     )}
                   </div>
@@ -216,7 +267,7 @@ export default function ShopCategory() {
                 <div className="mb-4">
                   <div
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex justify-between items-center px-3 py-2.5 rounded-lg bg-amber-50 text-[#f9c821] font-medium text-sm cursor-pointer"
+                    className={`flex justify-between items-center px-3 py-2.5 rounded-lg ${isOpen ? "bg-amber-50 text-[#f9c821] font-medium" : "text-gray-700"} text-sm cursor-pointer`}
                   >
                     Utility
                     <ChevronDown
@@ -228,16 +279,23 @@ export default function ShopCategory() {
                   {/* Dropdown */}
                   {isOpen && (
                     <ul className="mt-2 ml-4 pl-3 border-l-2 border-amber-300 space-y-1">
-                      {utilityBrand.models.map((model) => (
-                        <li key={model.id}>
-                          <Link
-                            to={`/shop/${model.brandName}/${model.id}`}
-                            className="block px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-amber-50 hover:text-amber-700"
-                          >
-                            {model.name}
-                          </Link>
-                        </li>
-                      ))}
+                      {utilityBrand.models.map((model) => {
+                        const isModelSelected = modelId && parseInt(modelId) === model.id;
+                        return (
+                          <li key={model.id}>
+                            <Link
+                              to={`/shop/${model.brandName}/${model.id}`}
+                              className={`block px-3 py-2 text-sm rounded-md transition-colors ${
+                                isModelSelected 
+                                  ? "bg-amber-100 text-amber-800 font-medium" 
+                                  : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
+                              }`}
+                            >
+                              {model.name}
+                            </Link>
+                          </li>
+                        );
+                      })}
                     </ul>
                   )}
                 </div>
@@ -249,7 +307,7 @@ export default function ShopCategory() {
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                {categoryTitle} {products.length > 0 && `(${pagination.totalItems} Products)`}
+                {categoryTitle} {selectedModelName && <span className="text-[20px] ">  {selectedModelName}</span>} {products.length > 0 && `(${pagination.totalItems} Products)`}
               </h1>
 
               <div className="flex items-center gap-3 flex-wrap">
