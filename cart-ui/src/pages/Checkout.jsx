@@ -197,7 +197,7 @@ export default function Checkout() {
                 <div className="text-center text-gray-600 py-16 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50">
                   <p className="mb-6 text-lg">No items selected.</p>
                   <a
-                    href="/club-pro/ezgo"
+                    href="/greengrass/brand/club-car"
                     className="text-[#f9c821] hover:text-gray-900 underline text-sm font-bold tracking-widest"
                   >
                     BUILD YOUR CART

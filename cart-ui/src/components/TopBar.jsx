@@ -1,8 +1,13 @@
+import { MoveLeft } from "lucide-react";
+import { MAIN_SITE_URL } from "../utils/api";
+
 export default function TopBar() {
   return (
     <div className="w-full bg-[#f9c821] border-b border-white/10 overflow-hidden">
       <div className="relative h-10 sm:h-12 md:h-14 flex items-center">
         
+        {/* Return to Partner Site - Desktop */}
+
         {/* Static text for desktop */}
         <div className="hidden sm:flex w-full justify-center text-black font-bold tracking-wide text-sm md:text-md">
           <span className="mx-6">THE MOST TRUSTED GOLF CAR ACCESSORIES SINCE 1989</span>

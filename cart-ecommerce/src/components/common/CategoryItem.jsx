@@ -54,7 +54,7 @@ export default function CategoryItem({
         {hasModels && (
           <div
             className="
-              absolute top-0 left-full ml-2
+              absolute top-0 left-full ml-1
               w-64 bg-white rounded-xl shadow-xl border border-gray-200
               opacity-0 invisible group-hover:opacity-100 group-hover:visible
               transition-all duration-200 z-50

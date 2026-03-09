@@ -113,6 +113,14 @@ export default function ProductDetail() {
               Shop
             </Link>
             <ChevronRight size={14} />
+            <Link to={`/shop/${encodeURIComponent(product.brand?.name)}`} className="hover:text-black">
+              {product.brand?.name}
+            </Link>
+            <ChevronRight size={14} />
+            <Link to={`/shop/${encodeURIComponent(product.brand?.name)}/${product.model?.id}`} className="hover:text-black">
+              {product.model?.name}
+            </Link>
+            <ChevronRight size={14} />
             <span className="font-medium text-text-white">{product.name}</span>
           </nav>
         </div>
