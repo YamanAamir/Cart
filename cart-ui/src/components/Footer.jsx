@@ -3,42 +3,45 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { BASE_URL } from "../utils/api";
 
-
 export default function Footer() {
   const [brands, setBrands] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-  
-    useEffect(() => {
-      const fetchBrands = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-  
-          // ← Replace with your actual API endpoint
-          const response = await fetch(`${BASE_URL}/all-brands`, {
-            headers: {
-              Accept: "application/json",
-              // add Authorization if needed: 'Authorization': `Bearer ${token}`,
-            },
-          });
-  
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-  
-          const data = await response.json();
-          setBrands(Array.isArray(data) ? data : []);
-        } catch (err) {
-          console.error("Failed to load brands:", err);
-          setError(err.message || "Could not load brands");
-        } finally {
-          setLoading(false);
-        }
-      };
-  
-      fetchBrands();
-    }, []);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [socialLinks, setSocialLinks] = useState([]);
+
+  useEffect(() => {
+    const fetchBrands = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(`${BASE_URL}/all-brands`, {
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setBrands(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to load brands:", err);
+        setError(err.message || "Could not load brands");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchOrgSettings = async () => {
+      try {
+        const res = await fetch(`${BASE_URL}/organization-settings`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.socialLinks?.length > 0) setSocialLinks(data.socialLinks);
+      } catch (err) {
+        console.error("Failed to load social links:", err);
+      }
+    };
+
+    fetchBrands();
+    fetchOrgSettings();
+  }, []);
 
   return (
     <footer className="w-full bg-[#f9c821] text-black border-t border-white/10">
@@ -98,11 +101,19 @@ export default function Footer() {
             </div>
 
             <div className="flex items-center gap-3 pt-2">
-              {[Instagram, Facebook, Linkedin].map((Icon, idx) => (
-                <a key={idx} href="#" className="bg-black hover:bg-black/80 p-2 rounded-full transition-all duration-300 group">
-                  <Icon className="w-4 h-4 text-white group-hover:text-white" />
-                </a>
-              ))}
+              {socialLinks.length > 0 ? (
+                socialLinks.map((link, idx) => (
+                  <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer" className="bg-black hover:bg-black/80 p-2 rounded-full transition-all duration-300 group">
+                    <span dangerouslySetInnerHTML={{ __html: link.svg }} className="w-4 h-4 block [&>svg]:w-4 [&>svg]:h-4 [&>svg]:fill-white" />
+                  </a>
+                ))
+              ) : (
+                [Instagram, Facebook, Linkedin].map((Icon, idx) => (
+                  <a key={idx} href="#" className="bg-black hover:bg-black/80 p-2 rounded-full transition-all duration-300 group">
+                    <Icon className="w-4 h-4 text-white group-hover:text-white" />
+                  </a>
+                ))
+              )}
             </div>
           </div>
         </div>

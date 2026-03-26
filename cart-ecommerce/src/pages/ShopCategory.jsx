@@ -29,7 +29,7 @@ const utilityBrand = {
       "id": 18,
       "name": "Carryall",
       "brandId": 1,
-      "brandName": "ClubCar",
+      "brandName": "club-car",
       "createdAt": "2025-12-22T13:43:53.369Z",
       "updatedAt": "2025-12-22T13:43:53.369Z"
     },
@@ -37,7 +37,7 @@ const utilityBrand = {
       "id": 19,
       "name": "Carryall 502",
       "brandId": 1,
-      "brandName": "ClubCar",
+      "brandName": "club-car",
       "createdAt": "2025-12-22T13:43:59.665Z",
       "updatedAt": "2025-12-22T13:43:59.665Z"
     }
@@ -159,6 +159,11 @@ export default function ShopCategory() {
     } else {
       setSelectedBrand(null);
     }
+    // Auto-open utility dropdown if a utility model is selected
+    if (modelId) {
+      const isUtilityModel = utilityBrand.models.some(m => m.id === parseInt(modelId));
+      if (isUtilityModel) setIsOpen(true);
+    }
     setCurrentPage(1);
   }, [brandName, modelId]);
 
@@ -190,20 +195,19 @@ export default function ShopCategory() {
             <ChevronRight size={14} />
             <Link to="/shop" className="hover:text-black">Shop</Link>
             <ChevronRight size={14} />
-            {brandName && (
+            {brandName && selectedModelName ? (
               <>
                 <Link to={`/shop/${encodeURIComponent(brandName)}`} className="hover:text-black">
                   {categoryTitle}
                 </Link>
-                {selectedModelName && (
-                  <>
-                    <ChevronRight size={14} />
-                    <span className="font-medium text-text-white">{selectedModelName}</span>
-                  </>
-                )}
+                <ChevronRight size={14} />
+                <span className="font-medium">{selectedModelName}</span>
               </>
+            ) : brandName ? (
+              <span className="font-medium">{categoryTitle}</span>
+            ) : (
+              <span className="font-medium">{categoryTitle}</span>
             )}
-            {!brandName && <span className="font-medium text-text-white">{categoryTitle}</span>}
           </nav>
         </div>
       </div>
@@ -249,7 +253,7 @@ export default function ShopCategory() {
                                 to={`/shop/${encodeURIComponent(brand.name)}/${model.id}`} 
                                 className={`block px-3 py-2 text-sm rounded-md transition-colors ${
                                   isModelSelected 
-                                    ? "bg-amber-50 text-amber-800 font-medium" 
+                                    ? "bg-[#f9c821] text-white font-medium" 
                                     : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
                                 }`}
                               >
@@ -287,7 +291,7 @@ export default function ShopCategory() {
                               to={`/shop/${model.brandName}/${model.id}`}
                               className={`block px-3 py-2 text-sm rounded-md transition-colors ${
                                 isModelSelected 
-                                  ? "bg-amber-100 text-amber-800 font-medium" 
+                                  ? "bg-[#f9c821] text-white font-medium" 
                                   : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
                               }`}
                             >
@@ -307,7 +311,7 @@ export default function ShopCategory() {
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                {categoryTitle} {selectedModelName && <span className="text-[20px] ">  {selectedModelName}</span>} {products.length > 0 && `(${pagination.totalItems} Products)`}
+                {categoryTitle}{selectedModelName && <span className="text-[20px] font-semibold text-gray-600"> &rsaquo; {selectedModelName}</span>} {products.length > 0 && `(${pagination.totalItems} Products)`}
               </h1>
 
               <div className="flex items-center gap-3 flex-wrap">

@@ -99,6 +99,8 @@ export default function ProductDetail() {
     product.imgAltFour,
   ].filter((_, i) => [product.imageOne, product.imageTwo, product.imageThree, product.imageFour][i]);
 
+  const isOutOfStock = product.stock === 0;
+
   return (
     <>
       <SEO data={product} />
@@ -138,6 +140,15 @@ export default function ProductDetail() {
                 alt={altTexts[activeImage] || product.seoTitle || product.name}
                 className="w-full h-[350px] md:h-[580px] lg:h-[650px] lg:object-cover transition-all duration-300"
               />
+
+              {/* Sold Out Banner */}
+              {isOutOfStock && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span className="bg-red-600 text-white text-2xl font-bold px-8 py-3 rounded-lg rotate-[-15deg] shadow-lg">
+                    SOLD OUT
+                  </span>
+                </div>
+              )}
 
               {/* Prev */}
               {images.length > 1 && (
@@ -270,6 +281,7 @@ export default function ProductDetail() {
             {/* Add to Cart */}
             <button
               onClick={() => {
+                if (isOutOfStock) return;
                 const priceToUse = product.salePrice && parseFloat(product.salePrice) > 0
                   ? parseFloat(product.salePrice)
                   : parseFloat(product.regularPrice || 0);
@@ -283,16 +295,18 @@ export default function ProductDetail() {
                   price: priceToUse,
                   image: `https://api.clubpromfg.com/uploads/products/${images[0]}`,
                   quantity: quantity
-
                 })
-              }
-              }
-              className={`w-full py-5 text-xl font-bold rounded-xl transition shadow-lg ${added
-                ? "bg-green-500 text-white"
-                : "bg-[#f9c821] hover:bg-yellow-500 text-white"
-                }`}
+              }}
+              disabled={isOutOfStock}
+              className={`w-full py-5 text-xl font-bold rounded-xl transition shadow-lg ${
+                isOutOfStock
+                  ? "bg-gray-400 text-white cursor-not-allowed"
+                  : added
+                    ? "bg-green-500 text-white"
+                    : "bg-[#f9c821] hover:bg-yellow-500 text-white"
+              }`}
             >
-              {added ? "Added to Cart ✓" : "Add to Cart"}
+              {isOutOfStock ? "Out of Stock" : added ? "Added to Cart ✓" : "Add to Cart"}
             </button>
 
             {/* Optional bottom info */}

@@ -68,15 +68,7 @@ export default function GolfCartBuilder() {
         "id": 18,
         "name": "Carryall",
         "brandId": 1,
-        "brandName": "ClubCar",
-        "createdAt": "2025-12-22T13:43:53.369Z",
-        "updatedAt": "2025-12-22T13:43:53.369Z"
-      },
-      {
-        "id": 19,
-        "name": "Carryall 502",
-        "brandId": 1,
-        "brandName": "ClubCar",
+        "brandName": "club-car",
         "createdAt": "2025-12-22T13:43:59.665Z",
         "updatedAt": "2025-12-22T13:43:59.665Z"
       }
@@ -244,8 +236,6 @@ export default function GolfCartBuilder() {
     setSelections((prev) => {
       const current = prev.items[category];
       const isSame = current && String(current.id) === String(product.id);
-
-      // Single select: toggles between selected and null
       const nextSelection = isSame ? null : product;
       setSelectedProduct(nextSelection);
 
@@ -257,6 +247,8 @@ export default function GolfCartBuilder() {
         },
       };
     });
+    // Reset image index to 0 whenever a new item is selected
+    setCurrentIndex(0);
   };
 
   const handleSaveBuild = () => {
@@ -332,6 +324,15 @@ export default function GolfCartBuilder() {
               role="img"
               aria-label="Selected golf cart configuration preview"
             ></div>
+
+            {/* Sold Out overlay when selected product is out of stock */}
+            {selectedProduct?.stock === 0 && (
+              <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                <span className="bg-red-600 text-white text-3xl font-bold px-10 py-4 rounded-lg rotate-[-15deg] shadow-lg tracking-widest">
+                  SOLD OUT
+                </span>
+              </div>
+            )}
 
             {allImages.length > 1 && (
               <>
@@ -515,11 +516,14 @@ export default function GolfCartBuilder() {
                               return (
                                 <div
                                   key={product.id}
-                                  onClick={() => handleSelect(categoryName, product)}
-                                  className={`flex items-center justify-between p-4 rounded-lg cursor-pointer transition-all border ${active
-                                    ? "bg-[#f9c821]/10 border-[#f9c821] text-[#f9c821]"
-                                    : "bg-white border-gray-200 hover:bg-gray-100"
-                                    }`}
+                                  onClick={() => !isOutOfStock && handleSelect(categoryName, product)}
+                                  className={`flex items-center justify-between p-4 rounded-lg transition-all border ${
+                                    isOutOfStock
+                                      ? "bg-gray-100 border-gray-200 cursor-not-allowed opacity-60"
+                                      : active
+                                        ? "bg-[#f9c821]/10 border-[#f9c821] text-[#f9c821] cursor-pointer"
+                                        : "bg-white border-gray-200 hover:bg-gray-100 cursor-pointer"
+                                  }`}
                                 >
                                   <div>
                                     <span className="text-base text-black font-medium">{product.name}</span>
