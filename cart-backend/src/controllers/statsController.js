@@ -1,4 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
+const path = require('path');
+const fs = require('fs');
 
 const prisma = new PrismaClient();
 
@@ -58,8 +60,12 @@ const getStatsCardById = async (req, res) => {
 const createStatsCard = async (req, res) => {
     try {
         const { title, value, link } = req.body;
+        let imageUrl = null;
+        if (req.file) {
+            imageUrl = `/uploads/stats-cards/${req.file.filename}`;
+        }
         const newStatsCard = await prisma.statsCards.create({
-            data: { title, value, link },
+            data: { title, value, link, imageUrl },
         });
         res.status(201).json({ statsCard: newStatsCard, message: 'Stats card created successfully' });
     }
@@ -70,13 +76,26 @@ const createStatsCard = async (req, res) => {
 };
 
 const updateStatsCard = async (req, res) => {
-
     try {
         const { id } = req.params;
         const { title, value, link } = req.body;
+
+        const existing = await prisma.statsCards.findUnique({ where: { id: parseInt(id) } });
+        if (!existing) return res.status(404).json({ error: 'Stats card not found' });
+
+        let imageUrl = existing.imageUrl;
+        if (req.file) {
+            // Delete old image if exists
+            if (existing.imageUrl) {
+                const oldPath = path.join(process.cwd(), existing.imageUrl);
+                if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            }
+            imageUrl = `/uploads/stats-cards/${req.file.filename}`;
+        }
+
         const updatedStatsCard = await prisma.statsCards.update({
             where: { id: parseInt(id) },
-            data: { title, value, link },
+            data: { title, value, link, imageUrl },
         });
         res.status(200).json({ statsCard: updatedStatsCard, message: 'Stats card updated successfully' });
     }

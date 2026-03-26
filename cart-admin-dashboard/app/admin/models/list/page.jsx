@@ -35,7 +35,7 @@ const columns = [
   {
     key: "actions",
     label: "Actions",
-    render: (row, { onDelete }) => (
+    render: (row, { onEdit, onDelete }) => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="icon">
@@ -43,6 +43,9 @@ const columns = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onEdit(row.id)}>
+            Edit
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onDelete(row.id)} className="text-red-600">
             Delete
           </DropdownMenuItem>
@@ -256,6 +259,7 @@ export default function Models() {
                       <TableCell>{model.products?.length || 0}</TableCell>
                       <TableCell>
                         {columns.find((c) => c.key === "actions").render(model, {
+                          onEdit: (id) => router.push(`/admin/models/${id}`),
                           onDelete: (id) => {
                             setSingleDeleteId(id);
                             setPendingAction("delete");

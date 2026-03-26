@@ -251,6 +251,7 @@ model StatsCards {
   title     String    @db.VarChar(255)
   value     String    @db.VarChar(255)
   link      String?   @db.VarChar(255)
+  imageUrl  String?   @db.Text
   createdAt DateTime? @default(now())
   updatedAt DateTime? @updatedAt
 }

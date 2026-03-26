@@ -163,6 +163,7 @@ export default function StatsCardsList() {
                                     />
                                 </TableHead>
                                 <TableHead>ID</TableHead>
+                                <TableHead>Image</TableHead>
                                 <TableHead>Title</TableHead>
                                 <TableHead>Value</TableHead>
                                 <TableHead>Actions</TableHead>
@@ -172,7 +173,7 @@ export default function StatsCardsList() {
                         <TableBody>
                             {cards.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-center py-12">
+                                    <TableCell colSpan={6} className="text-center py-12">
                                         <AlertCircle className="mx-auto mb-2 text-gray-400" />
                                         No stats cards found
                                     </TableCell>
@@ -187,6 +188,17 @@ export default function StatsCardsList() {
                                             />
                                         </TableCell>
                                         <TableCell>{card.id}</TableCell>
+                                        <TableCell>
+                                            {card.imageUrl ? (
+                                                <img
+                                                    src={`https://api.clubpromfg.com${card.imageUrl}`}
+                                                    alt={card.title}
+                                                    className="w-10 h-10 object-contain rounded-full bg-amber-100 p-1"
+                                                />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-lg">✓</div>
+                                            )}
+                                        </TableCell>
                                         <TableCell>{card.title}</TableCell>
                                         <TableCell>{card.value}</TableCell>
                                         <TableCell>

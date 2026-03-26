@@ -104,6 +104,13 @@ const upload = {
     limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
     fileFilter: imageFilter,
   }).single('image'),
+
+  // ── Stats Cards ── single icon/image
+  statsCardImage: multer({
+    storage: createStorage('stats-cards'),
+    limits: { fileSize: 2 * 1024 * 1024 }, // 2 MB
+    fileFilter: imageFilter,
+  }).single('image'),
 };
 
 module.exports = { upload };

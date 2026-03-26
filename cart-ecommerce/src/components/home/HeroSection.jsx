@@ -138,7 +138,7 @@
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { api, BASE_API } from "../../utils/api";
+import { api, BASE_API, BASE_URL } from "../../utils/api";
 
 const DEFAULT_SLIDES = [
   {
@@ -209,12 +209,12 @@ export default function HeroSection() {
 
   const currentSlide = heroSlides[currentIndex];
   // Simple check to determine if imageUrl is a path or full URL
-  const getImageUrl = (url) => {
-    if (!url) return "/assets/hero1.webp";
-    if (url.startsWith('http') || url.startsWith('/assets')) return url;
-    // Replace '/api' from BASE_API to get root URL for uploads
-    return `${BASE_API.replace('/api', '')}${url}`;
-  };
+  // const getImageUrl = (url) => {
+  //   if (!url) return "/assets/hero1.webp";
+  //   if (url.startsWith('http') || url.startsWith('/assets')) return url;
+  //   // Replace '/api' from BASE_API to get root URL for uploads
+  //   return `${BASE_URL}${url}`;
+  // };
 
   return (
     <div className="flex-1 relative overflow-hidden min-h-[320px] sm:min-h-[380px] md:min-h-[420px] lg:min-h-[500px] rounded-2xl bg-black">
@@ -226,7 +226,7 @@ export default function HeroSection() {
             }`}
         >
           <img
-            src={getImageUrl(slide.imageUrl)}
+            src={`https://api.clubpromfg.com${slide.imageUrl}`}
             alt={slide.imgAlt || slide.title}
             className="w-full h-full object-cover"
           />

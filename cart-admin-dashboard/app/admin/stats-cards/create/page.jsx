@@ -1,59 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import {api} from "@/lib/api";
+import { api, formDataApi } from "@/lib/api";
 
-/* ---------------- SCHEMA ---------------- */
-const statsCardSchema = z.object({
-    title: z.string().min(1, "Title is required"),
-    value: z.string().min(1, "Value is required"),
-    link: z.string().url("Please enter a valid URL"),
-});
+const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_API?.replace("/api", "") || "https://api.clubpromfg.com";
 
 export default function AddStatsCard() {
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [form, setForm] = useState({ title: "", value: "", link: "" });
+    const fileRef = useRef(null);
 
-    const form = useForm({
-        resolver: zodResolver(statsCardSchema),
-        defaultValues: {
-            title: "",
-            value: "",
-            link: "",
-        },
-    });
+    const handleChange = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-    /* ---------------- SUBMIT ---------------- */
-    const onSubmit = async (data) => {
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        if (file) setImagePreview(URL.createObjectURL(file));
+    };
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        if (!form.title || !form.value) return toast.error("Title and Value are required");
+
         try {
             setIsSubmitting(true);
+            const formData = new FormData();
+            formData.append("title", form.title);
+            formData.append("value", form.value);
+            if (form.link) formData.append("link", form.link);
+            if (fileRef.current?.files[0]) formData.append("image", fileRef.current.files[0]);
 
-            await api.post("/stats-cards/create", data);
+            await formDataApi.post("/stats-cards/create", formData);
 
             toast.success("Stats card created successfully");
-            form.reset();
-        } catch (error) {
+            setForm({ title: "", value: "", link: "" });
+            setImagePreview(null);
+            if (fileRef.current) fileRef.current.value = "";
+        } catch {
             toast.error("Failed to create stats card");
         } finally {
             setIsSubmitting(false);
@@ -65,73 +53,35 @@ export default function AddStatsCard() {
             <div className="container mx-auto p-4 max-w-2xl">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-2xl font-bold">
-                            Create Stats Card
-                        </CardTitle>
+                        <CardTitle className="text-2xl font-bold">Create Stats Card</CardTitle>
                     </CardHeader>
-
                     <CardContent>
-                        <Form {...form}>
-                            <form
-                                onSubmit={form.handleSubmit(onSubmit)}
-                                className="space-y-6"
-                            >
-                                {/* Title */}
-                                <FormField
-                                    control={form.control}
-                                    name="title"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Title</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g. Complimentary Shipping" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                {/* Value */}
-                                <FormField
-                                    control={form.control}
-                                    name="value"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Value / Description</FormLabel>
-                                            <FormControl>
-                                                <Input
-                                                    placeholder="e.g. Free delivery on all orders"
-                                                    {...field}
-                                                />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                     <FormField
-                                    control={form.control}
-                                    name="link"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Link</FormLabel>
-                                            <FormControl>
-                                                <Input placeholder="e.g. https://example.com" {...field} />
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <Button
-                                    type="submit"
-                                    className="w-full"
-                                    size="lg"
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? "Creating..." : "Create Stats Card"}
-                                </Button>
-                            </form>
-                        </Form>
+                        <form onSubmit={onSubmit} className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="title">Title</Label>
+                                <Input id="title" name="title" placeholder="e.g. Free Shipping" value={form.title} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="value">Value / Description</Label>
+                                <Input id="value" name="value" placeholder="e.g. Free delivery on all orders" value={form.value} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="link">Link (optional)</Label>
+                                <Input id="link" name="link" placeholder="e.g. https://example.com" value={form.link} onChange={handleChange} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="image">Icon / Image (optional)</Label>
+                                <Input id="image" name="image" type="file" accept="image/*" ref={fileRef} onChange={handleImageChange} />
+                                {imagePreview && (
+                                    <div className="mt-2 w-16 h-16 rounded-full bg-amber-100 overflow-hidden flex items-center justify-center">
+                                        <img src={imagePreview} alt="preview" className="w-full h-full object-contain p-1" />
+                                    </div>
+                                )}
+                            </div>
+                            <Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
+                                {isSubmitting ? "Creating..." : "Create Stats Card"}
+                            </Button>
+                        </form>
                     </CardContent>
                 </Card>
             </div>
