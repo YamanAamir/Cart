@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
+import { baseUrl } from "@/lib/const";
 
 export default function DealerRegistrationDetails() {
   const router = useRouter();
@@ -243,13 +244,13 @@ export default function DealerRegistrationDetails() {
 
                 {dealer.resaleCertificate.match(/\.(jpg|jpeg|png|webp)$/i) ? (
                   <img
-                    src={`http://localhost:5000${dealer.resaleCertificate}`}
+                    src={`${baseUrl}${dealer.resaleCertificate}`}
                     alt="Resale Certificate"
                     className="mt-2 max-w-xs rounded border"
                   />
                 ) : dealer.resaleCertificate.match(/\.pdf$/i) ? (
                   <iframe
-                    src={`http://localhost:5000${dealer.resaleCertificate}`}
+                    src={`${baseUrl}${dealer.resaleCertificate}`}
                     title="Resale Certificate PDF"
                     className="mt-2 w-full h-96 border rounded"
                   />

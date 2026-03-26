@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import api from "@/lib/api";
 import LoadingSpinner from "@/components/LoadingSpinner/LoadingSpinner";
 import { ArrowLeft, Upload, X } from "lucide-react";
+import { baseUrl } from "@/lib/const";
 
 export default function EditBrand() {
   const router = useRouter();
@@ -197,7 +198,7 @@ export default function EditBrand() {
               {previewLogo ? (
                 <div className="relative inline-block">
                   <img
-                    src={previewLogo.includes('base64') ? previewLogo : `http://localhost:5000${previewLogo}`}
+                    src={previewLogo.includes('base64') ? previewLogo : `${baseUrl}${previewLogo}`}
                     alt="Brand logo preview"
                     className="h-40 w-auto rounded-lg border object-contain bg-gray-50 shadow-sm"
                   />
