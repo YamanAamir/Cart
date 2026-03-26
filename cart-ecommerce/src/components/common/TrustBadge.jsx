@@ -6,7 +6,7 @@ const API_BASE_URL = "https://api.clubpromfg.com";
 export default function TrustBadge({ title, value, link, imageUrl }) {
   return (
     <Link to={link || "#"} className="p-6 cursor-pointer border border-gray-300 rounded-xl hover:shadow-md transition">
-      <div className="w-14 h-14 mx-auto mb-4 bg-amber-100 rounded-full flex items-center justify-center text-2xl overflow-hidden">
+      <div className={`w-20 h-20 mx-auto mb-4 ${imageUrl ? "" : "bg-amber-100 rounded-full"}  flex items-center justify-center text-2xl overflow-hidden`}>
         {imageUrl ? (
           <img
             src={`${API_BASE_URL}${imageUrl}`}

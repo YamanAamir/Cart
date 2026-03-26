@@ -18,7 +18,7 @@ export default function GolfCartBuilder() {
       // map slug → id (or use slug in DB later)
       const brandMap = {
         "e-z-go": 3,
-        "club-car": 1,
+        "ClubCar": 1,
         "yamaha": 2,
       };
 

@@ -54,7 +54,7 @@ export default function GolfCartBuilder() {
     "createdAt": "2025-12-23T20:19:09.219Z",
     "updatedAt": "2026-01-19T16:25:56.919Z",
     "path": "/brand/utility",
-    "logo": "/uploads/brands/1768839956724-109582124.png",
+    "logo": "/uploads/brands/1774538228575-275002850.png",
     "models": [
       {
         "id": 29,
