@@ -60,7 +60,7 @@ const createProduct = async (req, res) => {
     uploadedFiles.forEach((file, index) => {
       if (index < 4) {
         const field = `image${['One','Two','Three','Four'][index]}`;
-        imageFields[field] = `/uploads/products/${file.filename}`;
+        imageFields[field] = `${file.filename}`;
       }
     });
 
