@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 import { BASE_URL } from "../utils/api";
 
 export default function ForgotPassword() {
-    const [step, setStep] = useState(1); // Step 1: send code, Step 2: reset password
+    const [step, setStep] = useState(1);
     const [identifier, setIdentifier] = useState("");
     const [code, setCode] = useState("");
     const [newPassword, setNewPassword] = useState("");
@@ -11,6 +12,8 @@ export default function ForgotPassword() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const navigate = useNavigate();
 
@@ -146,23 +149,41 @@ export default function ForgotPassword() {
                             className="w-full px-4 py-3 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
                         />
 
-                        <input
-                            type="password"
-                            required
-                            placeholder="New password"
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="w-full px-4 py-3 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showNewPassword ? "text" : "password"}
+                                required
+                                placeholder="New password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full px-4 py-3 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 pr-12"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowNewPassword((prev) => !prev)}
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                            >
+                                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
 
-                        <input
-                            type="password"
-                            required
-                            placeholder="Confirm new password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full px-4 py-3 border rounded-md focus:ring-yellow-500 focus:border-yellow-500"
-                        />
+                        <div className="relative">
+                            <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                required
+                                placeholder="Confirm new password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="w-full px-4 py-3 border rounded-md focus:ring-yellow-500 focus:border-yellow-500 pr-12"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+                            >
+                                {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        </div>
 
                         <button
                             type="submit"

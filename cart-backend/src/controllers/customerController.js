@@ -375,17 +375,25 @@ exports.loginCustomer = async (req, res) => {
       where: { email },
     });
 
-    if (!customer || !customer.isActive) {
+    if (!customer) {
       return res.status(401).json({
-        message: "Invalid credentials or account inactive",
+        message: "Invalid credentials",
       });
     }
 
+    // Check password first
     const isMatch = await bcrypt.compare(password, customer.password);
 
     if (!isMatch) {
       return res.status(401).json({
         message: "Invalid credentials",
+      });
+    }
+
+    // Then check if account is active
+    if (!customer.isActive) {
+      return res.status(401).json({
+        message: "Your account is pending approval. You will be notified once approved.",
       });
     }
 

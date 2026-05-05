@@ -3,15 +3,14 @@ const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 const nodemailer = require("nodemailer");
 const { sendEmail } = require("../utils/sendEmail");
-const { put } = require("@vercel/blob");
 
 const prisma = new PrismaClient();
 
-// Configure email transporter
+// Configure email transporter (for admin notifications)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: true,
+  port: Number(process.env.SMTP_PORT),
+  secure: true, // true for port 465 (SSL)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -21,7 +20,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Email template for dealer registration
+// Email template for admin notification
 const getDealerEmailTemplate = (dealer) => {
   return `
     <!DOCTYPE html>
@@ -39,119 +38,47 @@ const getDealerEmailTemplate = (dealer) => {
     </head>
     <body>
       <div class="container">
-        <div class="header">
-          <h1>New Dealer Registration</h1>
-        </div>
+        <div class="header"><h1>New Dealer Registration</h1></div>
         <div class="content">
           <p>A new dealer has registered on the platform.</p>
-          
-          <div class="info-row">
-            <span class="label">Name:</span> ${dealer.name || "N/A"}
-          </div>
-          <div class="info-row">
-            <span class="label">Email:</span> ${dealer.email || "N/A"}
-          </div>
-          <div class="info-row">
-            <span class="label">Phone:</span> ${dealer.phone || "N/A"}
-          </div>
-          <div class="info-row">
-            <span class="label">Company:</span> ${dealer.companyName || "N/A"}
-          </div>
-          <div class="info-row">
-            <span class="label">Location:</span> ${dealer.location || "N/A"}
-          </div>
-          <div class="info-row">
-  <span class="label">Interested Brands:</span> ${dealer.interestedBrands.join(", ") || "None"
-    }
-</div>
-<div class="info-row">
-  <span class="label">Sell Brands:</span> ${dealer.sellBrands.join(", ") || "None"
-    }
-</div>
-<div class="info-row">
-  <span class="label">Authorized Dealer:</span> ${dealer.authorizedDealer.join(", ") || "None"
-    }
-</div>
-
-          <div class="info-row">
-            <span class="label">Registration Date:</span> ${new Date().toLocaleDateString()}
-          </div>
+          <div class="info-row"><span class="label">Name:</span> ${dealer.firstName || ""} ${dealer.lastName || ""}</div>
+          <div class="info-row"><span class="label">Email:</span> ${dealer.email || "N/A"}</div>
+          <div class="info-row"><span class="label">Phone:</span> ${dealer.phone || "N/A"}</div>
+          <div class="info-row"><span class="label">Company:</span> ${dealer.companyName || "N/A"}</div>
+          <div class="info-row"><span class="label">Interested Brands:</span> ${Array.isArray(dealer.interestedBrands) ? dealer.interestedBrands.join(", ") : "None"}</div>
+          <div class="info-row"><span class="label">Sell Brands:</span> ${Array.isArray(dealer.sellBrands) ? dealer.sellBrands.join(", ") : "None"}</div>
+          <div class="info-row"><span class="label">Authorized Dealer:</span> ${Array.isArray(dealer.authorizedDealer) ? dealer.authorizedDealer.join(", ") : "None"}</div>
+          <div class="info-row"><span class="label">Registration Date:</span> ${new Date().toLocaleDateString()}</div>
         </div>
-        <div class="footer">
-          <p>This is an automated message. Please do not reply.</p>
-        </div>
+        <div class="footer"><p>This is an automated message. Please do not reply.</p></div>
       </div>
     </body>
     </html>
   `;
 };
 
-// Confirmation email for the dealer
-const getDealerConfirmationTemplate = (dealer) => {
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #2196F3; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .footer { text-align: center; padding: 20px; font-size: 12px; color: #666; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h1>Welcome! Registration Confirmed</h1>
-        </div>
-        <div class="content">
-          <p>Dear ${dealer.name || "Dealer"},</p>
-          <p>Thank you for registering with us! Your dealer application has been received successfully.</p>
-          <p>Our team will review your application and get back to you within 2-3 business days.</p>
-          <p>If you have any questions, feel free to contact our support team.</p>
-          <p>Best regards,<br>The Team</p>
-        </div>
-        <div class="footer">
-          <p>This is an automated message. Please do not reply.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
-};
-
-// Send email function
+// Send email via local transporter
 const sendNormalEmail = async (to, subject, html) => {
   try {
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
-      to,
-      subject,
-      html,
-    });
+    await transporter.sendMail({ from: process.env.FROM_EMAIL, to, subject, html });
     return { success: true };
   } catch (error) {
-    console.error("Email sending failed:", error);
+    console.error("     led:", error);
     return { success: false, error: error.message };
   }
 };
 
+// ==================== CREATE ====================
 const createDealerRegistration = async (req, res) => {
   try {
-    // Validate request
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        errors: errors.array(),
-      });
+      return res.status(400).json({ success: false, errors: errors.array() });
     }
 
     const data = req.body;
-    const email= data.email;
+    const email = data.email;
 
-    // Check for existing registration with the same email
     const existingRegistration = await prisma.dealerRegistration.findUnique({
       where: { email },
     });
@@ -164,42 +91,79 @@ const createDealerRegistration = async (req, res) => {
     }
 
     let resaleCertificate = null;
-
     if (req.file) {
-      // Save relative path – this matches what you serve via express.static('/uploads')
       resaleCertificate = `/uploads/registrations/${req.file.filename}`;
     }
 
-    // Create dealer registration
+    // Generate password at registration time
+    const plainPassword = Math.random().toString(36).slice(-10);
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    // Save dealer registration
     const dealer = await prisma.dealerRegistration.create({
       data: {
         ...data,
-        resaleCertificate,           // ← now storing local path or null
+        resaleCertificate,
         interestedBrands: data.interestedBrands || [],
         sellBrands: data.sellBrands || [],
         authorizedDealer: data.authorizedDealer || [],
       },
     });
 
-    // Send notification email to admin
-    const adminEmail = "prehodacpro@gmail.com";
-    if (adminEmail) {
-      await sendNormalEmail(
-        adminEmail,
-        "New Dealer Registration",
-        getDealerEmailTemplate(dealer)
-      );
+    // Create or update customer account (inactive until approved)
+    const existingCustomer = await prisma.customers.findUnique({ where: { email } });
+    if (!existingCustomer) {
+      await prisma.customers.create({
+        data: {
+          fullName: `${data.firstName} ${data.lastName}`,
+          email: data.email,
+          password: hashedPassword,
+          isActive: false,
+          billingStreet: data.billingStreet || "",
+          billingCity: data.billingCity || "",
+          billingState: data.billingState || "",
+          billingZip: data.billingZip || "",
+          billingCountry: data.billingCountry || "",
+          commercialStreet: data.commercialStreet || "",
+          commercialCity: data.commercialCity || "",
+          commercialState: data.commercialState || "",
+          commercialZip: data.commercialZip || "",
+          commercialCountry: data.commercialCountry || "",
+        },
+      });
+    } else {
+      // Customer already exists — update password with new hash
+      await prisma.customers.update({
+        where: { email },
+        data: {
+          password: hashedPassword,
+          isActive: false,
+        },
+      });
     }
 
+    // Notify admin
+    await sendNormalEmail(
+      "prehodacpro@gmail.com",
+      "New Dealer Registration",
+      getDealerEmailTemplate(dealer)
+    );
+
+    // Send credentials to dealer
     await sendEmail({
       to: data.email,
-      subject: "Your Dealer Account Application Has Been Recieved",
+      subject: "Your Dealer Account Application Has Been Received",
       html: `
-        <h2>About Your Application</h2>
-        <p>Great news! Your ClubPro GreenGrass application has been accepted and is now moving through final approval.</p>
-        <p>If approved, you’ll receive an email from Club Pro with a temporary password. Simply log in using that password and your username (email you signed up with) then head to your Profile page to update it.</p>
-       
-        <p><strong>Log in here to get started: https://clubpromfg.com/greengrass/login </strong> </p>
+        <h2>Application Received</h2>
+        <p>Dear ${data.firstName},</p>
+        <p>Thank you for registering with ClubPro GreenGrass. Your application has been received and is currently under review.</p>
+        <p>Our team will review your application and notify you once it has been approved (typically within 2-3 business days).</p>
+        <p>Once approved, you will receive a separate confirmation email and will be able to log in using:</p>
+        <p><strong>Username (Email):</strong> ${data.email}</p>
+        <p><strong>Temporary Password:</strong> ${plainPassword}</p>
+        <p><strong>Login Link:</strong> <a href="https://clubpromfg.com/greengrass/login">https://clubpromfg.com/greengrass/login</a></p>
+        <p><em>Note: Your account will only be active after approval. Please do not attempt to log in until you receive the approval email.</em></p>
+        <p>Best regards,<br>ClubPro GreenGrass Team</p>
       `,
     });
 
@@ -213,39 +177,29 @@ const createDealerRegistration = async (req, res) => {
     res.status(500).json({
       success: false,
       error: "Failed to save dealer registration",
-      details:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
+      details: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 };
 
-// controllers/dealerRegistrationController.js (or wherever you keep it)
-
+// ==================== GET ALL (PAGINATED) ====================
 const getAllDealerRegistrationsPagination = async (req, res) => {
-  const {
-    page = 1,
-    limit = 10,
-    search = "",
-    sort = "createdAt",
-    order = "desc",
-  } = req.query;
-
+  const { page = 1, limit = 10, search = "", sort = "createdAt", order = "desc" } = req.query;
   const skip = (page - 1) * limit;
 
   try {
-    // Build search conditions across multiple relevant fields
     const where = search
       ? {
-        OR: [
-          { companyName: { contains: search } },
-          { firstName: { contains: search } },
-          { lastName: { contains: search } },
-          { email: { contains: search } },
-          { phone: { contains: search } },
-          { commercialCity: { contains: search } },
-          { commercialState: { contains: search } },
-        ],
-      }
+          OR: [
+            { companyName: { contains: search } },
+            { firstName: { contains: search } },
+            { lastName: { contains: search } },
+            { email: { contains: search } },
+            { phone: { contains: search } },
+            { commercialCity: { contains: search } },
+            { commercialState: { contains: search } },
+          ],
+        }
       : {};
 
     const [dealers, totalItems] = await Promise.all([
@@ -255,46 +209,23 @@ const getAllDealerRegistrationsPagination = async (req, res) => {
         take: Number(limit),
         orderBy: { [sort]: order.toLowerCase() },
         select: {
-          id: true,
-          companyName: true,
-          title: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          phone: true,
-          mobile: true,
-          fax: true,
-          billingStreet: true,
-          billingCity: true,
-          billingState: true,
-          billingZip: true,
-          billingCountry: true,
-          commercialStreet: true,
-          commercialCity: true,
-          commercialState: true,
-          commercialZip: true,
-          commercialCountry: true,
-          hasShowroom: true,
-          isApproved: true,
-          status: true,
-          interestedBrands: true,
-          sellBrands: true,
-          authorizedDealer: true,
-          sellBrandsOther: true,
-          authorizedDealersOther: true,
-          resaleCertificate: true,
-          createdAt: true,
+          id: true, companyName: true, title: true, firstName: true, lastName: true,
+          email: true, phone: true, mobile: true, fax: true,
+          billingStreet: true, billingCity: true, billingState: true, billingZip: true, billingCountry: true,
+          commercialStreet: true, commercialCity: true, commercialState: true, commercialZip: true, commercialCountry: true,
+          hasShowroom: true, isApproved: true, status: true,
+          interestedBrands: true, sellBrands: true, authorizedDealer: true,
+          sellBrandsOther: true, authorizedDealersOther: true, resaleCertificate: true, createdAt: true,
         },
       }),
       prisma.dealerRegistration.count({ where }),
     ]);
 
-    // Optional: Parse JSON string fields if stored as String in DB
-    const formattedDealers = dealers.map((dealer) => ({
-      ...dealer,
-      interestedBrands: dealer.interestedBrands || [],
-      sellBrands: dealer.sellBrands || [],
-      authorizedDealer: dealer.authorizedDealer || [],
+    const formattedDealers = dealers.map((d) => ({
+      ...d,
+      interestedBrands: d.interestedBrands || [],
+      sellBrands: d.sellBrands || [],
+      authorizedDealer: d.authorizedDealer || [],
     }));
 
     res.status(200).json({
@@ -313,8 +244,6 @@ const getAllDealerRegistrationsPagination = async (req, res) => {
 };
 
 // ==================== GET BY ID ====================
-// controllers/dealerRegistrationController.js
-
 const getDealerRegistrationById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -322,35 +251,13 @@ const getDealerRegistrationById = async (req, res) => {
     const dealerRegistration = await prisma.dealerRegistration.findUnique({
       where: { id: parseInt(id) },
       select: {
-        id: true,
-        companyName: true,
-        title: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phone: true,
-        mobile: true,
-        fax: true,
-        billingStreet: true,
-        billingCity: true,
-        billingState: true,
-        billingZip: true,
-        billingCountry: true,
-        commercialStreet: true,
-        commercialCity: true,
-        commercialState: true,
-        commercialZip: true,
-        commercialCountry: true,
-        hasShowroom: true,
-        isApproved: true,
-        status: true,
-        interestedBrands: true,
-        sellBrands: true,
-        authorizedDealer: true,
-        sellBrandsOther: true,
-        authorizedDealersOther: true,
-        resaleCertificate: true,
-        createdAt: true,
+        id: true, companyName: true, title: true, firstName: true, lastName: true,
+        email: true, phone: true, mobile: true, fax: true,
+        billingStreet: true, billingCity: true, billingState: true, billingZip: true, billingCountry: true,
+        commercialStreet: true, commercialCity: true, commercialState: true, commercialZip: true, commercialCountry: true,
+        hasShowroom: true, isApproved: true, status: true,
+        interestedBrands: true, sellBrands: true, authorizedDealer: true,
+        sellBrandsOther: true, authorizedDealersOther: true, resaleCertificate: true, createdAt: true,
       },
     });
 
@@ -358,63 +265,78 @@ const getDealerRegistrationById = async (req, res) => {
       return res.status(404).json({ message: "Dealer registration not found" });
     }
 
-    // Parse JSON string fields if they are stored as String in the database
-    const formattedDealer = {
+    res.status(200).json({
       ...dealerRegistration,
-      interestedBrands: dealer.interestedBrands || [],
-      sellBrands: dealer.sellBrands || [],
-      authorizedDealer: dealer.authorizedDealer || [],
-    };
-
-    res.status(200).json(formattedDealer);
+      interestedBrands: dealerRegistration.interestedBrands || [],
+      sellBrands: dealerRegistration.sellBrands || [],
+      authorizedDealer: dealerRegistration.authorizedDealer || [],
+    });
   } catch (error) {
     console.error("Error fetching dealer registration:", error);
     res.status(500).json({ message: "Failed to fetch dealer registration" });
   }
 };
 
+// ==================== TOGGLE APPROVED ====================
 const toggleDealerRegistration = async (req, res) => {
   try {
     const { id } = req.params;
 
     const dealerRegistration = await prisma.dealerRegistration.findUnique({
       where: { id: parseInt(id) },
-      select: {
-        isApproved: true,
-      },
     });
+
+    const newApprovedStatus = !dealerRegistration.isApproved;
 
     const approveDealer = await prisma.dealerRegistration.update({
       where: { id: parseInt(id) },
-      data: {
-        isApproved: !dealerRegistration.isApproved,
-      },
+      data: { isApproved: newApprovedStatus },
     });
+
+    // If approving, activate customer account
+    if (newApprovedStatus === true) {
+      const existingCustomer = await prisma.customers.findUnique({
+        where: { email: dealerRegistration.email },
+      });
+
+      if (existingCustomer) {
+        await prisma.customers.update({
+          where: { email: dealerRegistration.email },
+          data: { isActive: true },
+        });
+        console.log(`Customer activated: ${dealerRegistration.email}`);
+      }
+    } else {
+      // If un-approving, deactivate customer
+      const existingCustomer = await prisma.customers.findUnique({
+        where: { email: dealerRegistration.email },
+      });
+      if (existingCustomer) {
+        await prisma.customers.update({
+          where: { email: dealerRegistration.email },
+          data: { isActive: false },
+        });
+      }
+    }
 
     res.status(200).json(approveDealer);
   } catch (error) {
-    console.error("Error fetching dealer registration:", error);
-    res.status(500).json({ message: "Failed to fetch dealer registration" });
+    console.error("Error toggling dealer registration:", error);
+    res.status(500).json({ message: "Failed to toggle dealer registration" });
   }
 };
 
+// ==================== BULK DELETE ====================
 const bulkDeleteDealerRegistrations = async (req, res) => {
   try {
     const { ids } = req.body;
 
-    // Validation
     if (!Array.isArray(ids) || ids.length === 0) {
-      return res.status(400).json({
-        message: "ids must be a non-empty array",
-      });
+      return res.status(400).json({ message: "ids must be a non-empty array" });
     }
 
     const result = await prisma.dealerRegistration.deleteMany({
-      where: {
-        id: {
-          in: ids.map(Number),
-        },
-      },
+      where: { id: { in: ids.map(Number) } },
     });
 
     res.status(200).json({
@@ -423,20 +345,17 @@ const bulkDeleteDealerRegistrations = async (req, res) => {
     });
   } catch (error) {
     console.error("Error deleting dealer registrations:", error);
-    res.status(500).json({
-      message: "Failed to delete dealer registrations",
-    });
+    res.status(500).json({ message: "Failed to delete dealer registrations" });
   }
 };
 
+// ==================== UPDATE (STATUS / APPROVE) ====================
 const updateDealerRegistration = async (req, res) => {
   try {
     const id = Number(req.params.id);
     const { status, title, mobile, fax } = req.body;
 
-    const dealer = await prisma.dealerRegistration.findUnique({
-      where: { id },
-    });
+    const dealer = await prisma.dealerRegistration.findUnique({ where: { id } });
 
     if (!dealer) {
       return res.status(404).json({ message: "Dealer registration not found" });
@@ -452,66 +371,84 @@ const updateDealerRegistration = async (req, res) => {
       return res.status(400).json({ message: "No changes provided" });
     }
 
-    let shouldCreateCustomer = false;
-
-    // ✅ TRANSACTION: DB ONLY
-    const updatedDealer = await prisma.$transaction(async (tx) => {
-      const updated = await tx.dealerRegistration.update({
-        where: { id },
-        data: updateData,
-      });
-
-      if (status === "approved" && dealer.status !== "approved") {
-        const existingCustomer = await tx.customers.findUnique({
-          where: { email: dealer.email },
-        });
-
-        if (!existingCustomer) {
-          shouldCreateCustomer = true;
-        }
-      }
-
-      return updated;
+    // Update dealer registration
+    const updatedDealer = await prisma.dealerRegistration.update({
+      where: { id },
+      data: updateData,
     });
 
-    // ✅ OUTSIDE TRANSACTION (SAFE)
-    if (shouldCreateCustomer) {
-      const plainPassword = Math.random().toString(36).slice(-10);
-      const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    // If status changed to approved, activate customer and send email
+    if (status === "approved" && dealer.status !== "approved") {
+      console.log(`Dealer ${dealer.email} approved — sending email...`);
 
-      await prisma.customers.create({
-        data: {
-          fullName: `${dealer.firstName} ${dealer.lastName}`,
-          email: dealer.email,
-          password: hashedPassword,
-          isActive: true,
-
-          billingStreet: dealer.billingStreet,
-          billingCity: dealer.billingCity,
-          billingState: dealer.billingState,
-          billingZip: dealer.billingZip,
-          billingCountry: dealer.billingCountry,
-
-          commercialStreet: dealer.commercialStreet,
-          commercialCity: dealer.commercialCity,
-          commercialState: dealer.commercialState,
-          commercialZip: dealer.commercialZip,
-          commercialCountry: dealer.commercialCountry,
-        },
+      const existingCustomer = await prisma.customers.findUnique({
+        where: { email: dealer.email },
       });
 
-      await sendEmail({
-        to: dealer.email,
-        subject: "Your Dealer Account Has Been Approved",
-        html: `
-          <h2>Account Approved 🎉</h2>
-          <p>Your dealer account has been approved.</p>
-          <p><strong>Username:</strong> ${dealer.email}</p>
-          <p><strong>Password:</strong> ${plainPassword}</p>
-          <p><strong>Login Link:</strong> https://clubpromfg.com/greengrass/login</p>
-          <p>Please log in and change your password immediately.</p>
-        `,
-      });
+      if (existingCustomer) {
+        // Activate the customer account
+        await prisma.customers.update({
+          where: { email: dealer.email },
+          data: { isActive: true },
+        });
+
+        await sendEmail({
+          to: dealer.email,
+          subject: "Your Dealer Account Has Been Approved",
+          html: `
+            <h2>Account Approved 🎉</h2>
+            <p>Dear ${dealer.firstName},</p>
+            <p>Your dealer account has been approved. You can now log in.</p>
+            <p><strong>Username:</strong> ${dealer.email}</p>
+            <p><strong>Login Link:</strong> <a href="https://clubpromfg.com/greengrass/login">https://clubpromfg.com/greengrass/login</a></p>
+            <p>Use the temporary password that was sent to you during registration. Please change it after logging in.</p>
+            <p>Best regards,<br>ClubPro GreenGrass Team</p>
+          `,
+        });
+
+        console.log(`Approval email sent to ${dealer.email}`);
+      } else {
+        // Fallback: customer not found, create new one with fresh password
+        console.log(`Customer not found for ${dealer.email} — creating new account...`);
+        const plainPassword = Math.random().toString(36).slice(-10);
+        const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+        await prisma.customers.create({
+          data: {
+            fullName: `${dealer.firstName} ${dealer.lastName}`,
+            email: dealer.email,
+            password: hashedPassword,
+            isActive: true,
+            billingStreet: dealer.billingStreet,
+            billingCity: dealer.billingCity,
+            billingState: dealer.billingState,
+            billingZip: dealer.billingZip,
+            billingCountry: dealer.billingCountry,
+            commercialStreet: dealer.commercialStreet,
+            commercialCity: dealer.commercialCity,
+            commercialState: dealer.commercialState,
+            commercialZip: dealer.commercialZip,
+            commercialCountry: dealer.commercialCountry,
+          },
+        });
+
+        await sendEmail({
+          to: dealer.email,
+          subject: "Your Dealer Account Has Been Approved",
+          html: `
+            <h2>Account Approved 🎉</h2>
+            <p>Dear ${dealer.firstName},</p>
+            <p>Your dealer account has been approved.</p>
+            <p><strong>Username:</strong> ${dealer.email}</p>
+            <p><strong>Temporary Password:</strong> ${plainPassword}</p>
+            <p><strong>Login Link:</strong> <a href="https://clubpromfg.com/greengrass/login">https://clubpromfg.com/greengrass/login</a></p>
+            <p>Please log in and change your password immediately.</p>
+            <p>Best regards,<br>ClubPro GreenGrass Team</p>
+          `,
+        });
+
+        console.log(`Approval email with new password sent to ${dealer.email}`);
+      }
     }
 
     res.json({
@@ -519,6 +456,7 @@ const updateDealerRegistration = async (req, res) => {
       data: updatedDealer,
     });
   } catch (error) {
+    console.error("updateDealerRegistration error:", error);
     res.status(500).json({
       message: "Failed to update dealer registration",
       error: error.message,
@@ -526,11 +464,11 @@ const updateDealerRegistration = async (req, res) => {
   }
 };
 
-
 module.exports = {
   createDealerRegistration,
   getAllDealerRegistrationsPagination,
   getDealerRegistrationById,
   toggleDealerRegistration,
-  bulkDeleteDealerRegistrations, updateDealerRegistration,
+  bulkDeleteDealerRegistrations,
+  updateDealerRegistration,
 };

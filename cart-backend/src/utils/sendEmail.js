@@ -3,20 +3,29 @@ const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure: true, // REQUIRED for port 465
+  secure: true, // true for port 465 (SSL)
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
 });
 
 const sendEmail = async ({ to, subject, html }) => {
-  await transporter.sendMail({
-    from: `"GreenGrass" <${process.env.FROM_EMAIL}>`,
-    to,
-    subject,
-    html,
-  });
+  try {
+    const info = await transporter.sendMail({
+      from: `"GreenGrass" <${process.env.FROM_EMAIL}>`,
+      to,
+      subject,
+      html,
+    });
+    console.log(`Email sent to ${to}: ${info.messageId}`);
+  } catch (err) {
+    console.error(`Email send failed to ${to}:`, err.message);
+    throw err;
+  }
 };
 
 const sendNormalEmail = async (to, subject, html) => {

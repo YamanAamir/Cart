@@ -1,7 +1,7 @@
 // src/api/api.js
 
-// export const BASE_URL = "http://localhost:5000/api"; // local api url
-export const BASE_URL = "https://api.clubpromfg.com/api"; // live api url
+export const BASE_URL = "http://localhost:5000/api"; // local api url
+// export const BASE_URL = "https://api.clubpromfg.com/api"; // live api url
 export const MAIN_SITE_URL = "https://clubpromfg.com"; // main website url
 
 export const BASE_IMAGE_URL = "http://localhost:5000/uploads/products/"; // local api url
