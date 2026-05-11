@@ -204,7 +204,7 @@ const updateProduct = async (req, res) => {
           const oldPath = path.join(process.cwd(), "uploads", "products", path.basename(currentImages[field]));
           if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
         }
-        currentImages[field] = `/uploads/products/${file.filename}`;
+        currentImages[field] = `/${file.filename}`;
       }
     }
 
