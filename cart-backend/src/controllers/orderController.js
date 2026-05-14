@@ -257,27 +257,34 @@ exports.stripeSession = async (req, res) => {
       return res.status(404).json({ message: "Customer not found" });
     }
 
+    const itemIds = items.map((i) => Number(i.id));
+
     const products = await prisma.product.findMany({
-      where: { id: { in: items.map((i) => i.id) } },
+      where: { id: { in: itemIds } },
     });
 
     if (products.length !== items.length) {
       return res.status(400).json({ message: "One or more products not found" });
     }
 
-    // ─── Fishbowl Stock Check (Prevent Overselling) ───
+    // ─── Stock Check (Fishbowl if synced, DB fallback otherwise) ───
     for (const item of items) {
-      const product = products.find((p) => p.id === item.id);
+      const product = products.find((p) => p.id === Number(item.id));
+
       if (!product.fishbowlPartNumber) {
-        return res.status(400).json({
-          message: `Product "${product.name}" not synced to Fishbowl`,
-        });
+        // Not synced to Fishbowl yet — use DB stock
+        if (product.stock < item.qty) {
+          return res.status(400).json({
+            message: `Insufficient stock for "${product.name}"`,
+          });
+        }
+        continue;
       }
 
       const fbStock = await fishbowl.getPartInventory(product.fishbowlPartNumber);
       if (fbStock < item.qty) {
         return res.status(400).json({
-          message: `Insufficient stock for "${product.name}" (Fishbowl: ${fbStock} available, requested: ${item.qty})`,
+          message: `Insufficient stock for "${product.name}" (available: ${fbStock}, requested: ${item.qty})`,
         });
       }
     }
@@ -289,7 +296,7 @@ exports.stripeSession = async (req, res) => {
     let totalHeightIn = 0;
 
     for (const item of items) {
-      const product = products.find((p) => p.id === item.id);
+      const product = products.find((p) => p.id === Number(item.id));
       totalWeightLb += Number(product.weightLb) * item.qty;
       maxLengthIn = Math.max(maxLengthIn, Number(product.lengthIn));
       maxWidthIn = Math.max(maxWidthIn, Number(product.widthIn));
@@ -337,22 +344,27 @@ exports.stripeSession = async (req, res) => {
       is_residential: true,
     };
 
-    const shipment = await shippo.shipments.create({
-      addressFrom,
-      addressTo,
-      parcels: [parcel],
-      async: false,
-    });
+    let shippingCost = 0;
+    let selectedRate = null;
 
-    if (!shipment.rates || shipment.rates.length === 0) {
-      return res.status(400).json({ message: "No shipping rates available" });
+    try {
+      const shipment = await shippo.shipments.create({
+        addressFrom,
+        addressTo,
+        parcels: [parcel],
+        async: false,
+      });
+
+      if (shipment.rates && shipment.rates.length > 0) {
+        selectedRate = shipment.rates.reduce((prev, curr) =>
+          parseFloat(prev.amount) < parseFloat(curr.amount) ? prev : curr
+        );
+        shippingCost = parseFloat(selectedRate.amount);
+      }
+    } catch (shippoErr) {
+      console.error("Shippo rate calculation failed (invalid address?):", shippoErr.message);
+      // Fallback: $0 shipping — admin will handle manually
     }
-
-    const selectedRate = shipment.rates.reduce((prev, curr) =>
-      parseFloat(prev.amount) < parseFloat(curr.amount) ? prev : curr
-    );
-
-    const shippingCost = parseFloat(selectedRate.amount);
 
     // Stripe line items
     const line_items = items.map((item) => ({
@@ -367,7 +379,7 @@ exports.stripeSession = async (req, res) => {
     line_items.push({
       price_data: {
         currency: "usd",
-        product_data: { name: `Shipping (${selectedRate.servicelevel.name})` },
+        product_data: { name: selectedRate ? `Shipping (${selectedRate.servicelevel.name})` : "Shipping" },
         unit_amount: Math.round(shippingCost * 100),
       },
       quantity: 1,
@@ -407,8 +419,8 @@ exports.stripeSession = async (req, res) => {
         customerId: String(customerId),
         items: JSON.stringify(items.map((item) => ({ id: item.id, qty: item.qty, price: item.price }))),
         shippingCost: shippingCost.toString(),
-        serviceLevel: selectedRate.servicelevel.token,
-        serviceName: selectedRate.servicelevel.name,
+        serviceLevel: selectedRate?.servicelevel?.token || "",
+        serviceName: selectedRate?.servicelevel?.name || "Flat Rate",
       },
       success_url: `https://clubpromfg.com/greengrass/`,
       cancel_url: `https://clubpromfg.com/greengrass/`,

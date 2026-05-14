@@ -233,7 +233,7 @@ export default function GolfCartBuilder() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="lg:w-[35%]"
         >
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             <h2 className="text-xs font-bold text-[#f9c821] mb-6 tracking-[0.2em] uppercase border-b border-gray-300 pb-4">
               Select Your Model
             </h2>

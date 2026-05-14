@@ -55,7 +55,7 @@ export default function Header() {
       <div className="flex items-center gap-3">
         <a
           href={`${MAIN_SITE_URL}/quick-shop/`}
-          className="flex flex-row justify-center items-center gap-2 text-black text-sm font-medium hover:underline underline-offset-4 transition-colors duration-200"
+          className="md:flex hidden flex flex-row justify-center items-center gap-2 text-black text-sm font-medium hover:underline underline-offset-4 transition-colors duration-200"
         >
           <MoveLeft size={15} /> Return to Partner Site
         </a>

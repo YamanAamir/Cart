@@ -16,7 +16,7 @@ export default function CategorySidebar() {
     createdAt: "2025-12-23T20:19:09.219Z",
     updatedAt: "2026-01-19T16:25:56.919Z",
     path: "/brand/utility",
-    logo: "/uploads/brands/1774538228575-275002850.png",
+    logo: "/uploads/brands/1778779366813-87870800.png",
     models: [
       {
         id: 29,

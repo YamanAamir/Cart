@@ -15,7 +15,7 @@ const utilityBrand = {
   "createdAt": "2025-12-23T20:19:09.219Z",
   "updatedAt": "2026-01-19T16:25:56.919Z",
   "path": "/brand/utility",
-  "logo": "/uploads/brands/1774538228575-275002850.png",
+  "logo": "/uploads/brands/1778779366813-87870800.png",
   "models": [
     {
       "id": 29,
@@ -249,13 +249,12 @@ export default function ShopCategory() {
                           const isModelSelected = modelId && parseInt(modelId) === model.id;
                           return (
                             <li key={model.id}>
-                              <Link 
-                                to={`/shop/${encodeURIComponent(brand.name)}/${model.id}`} 
-                                className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                                  isModelSelected 
-                                    ? "bg-[#f9c821] text-white font-medium" 
-                                    : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                                }`}
+                              <Link
+                                to={`/shop/${encodeURIComponent(brand.name)}/${model.id}`}
+                                className={`block px-3 py-2 text-sm rounded-md transition-colors ${isModelSelected
+                                  ? "bg-[#f9c821] text-white font-medium"
+                                  : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
+                                  }`}
                               >
                                 {model.name}
                               </Link>
@@ -289,11 +288,10 @@ export default function ShopCategory() {
                           <li key={model.id}>
                             <Link
                               to={`/shop/${model.brandName}/${model.id}`}
-                              className={`block px-3 py-2 text-sm rounded-md transition-colors ${
-                                isModelSelected 
-                                  ? "bg-[#f9c821] text-white font-medium" 
-                                  : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
-                              }`}
+                              className={`block px-3 py-2 text-sm rounded-md transition-colors ${isModelSelected
+                                ? "bg-[#f9c821] text-white font-medium"
+                                : "text-gray-700 hover:bg-amber-50 hover:text-amber-700"
+                                }`}
                             >
                               {model.name}
                             </Link>

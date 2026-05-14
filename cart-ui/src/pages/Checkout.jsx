@@ -100,7 +100,7 @@ export default function Checkout() {
 
         {/* RIGHT: Cart Details */}
         <div className="lg:w-[35%]">
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             {/* Header */}
             <div className="flex justify-between items-center mb-8 border-b border-gray-300 pb-4">
               <h2 className="text-sm font-bold tracking-[0.2em] text-[#f9c821] uppercase flex items-center gap-2">
@@ -219,7 +219,12 @@ export default function Checkout() {
 
               <button
                 onClick={handleStripeCheckout}
-                className="w-full bg-[#f9c821] hover:bg-[#e0b318] text-white font-bold text-sm tracking-[0.2em] py-5 rounded-xl shadow-lg shadow-[#f9c821]/30 transition-all hover:scale-[1.02] active:scale-98 uppercase flex items-center justify-center gap-3"
+                disabled={items.length === 0}
+                className={`w-full font-bold text-sm tracking-[0.2em] py-5 rounded-xl uppercase flex items-center justify-center gap-3 transition-all ${
+                  items.length === 0
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    : "bg-[#f9c821] hover:bg-[#e0b318] text-white shadow-lg shadow-[#f9c821]/30 hover:scale-[1.02] active:scale-98"
+                }`}
               >
                 Check Out <ArrowRight className="w-5 h-5" />
               </button>

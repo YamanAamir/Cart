@@ -54,7 +54,7 @@ export default function GolfCartBuilder() {
     "createdAt": "2025-12-23T20:19:09.219Z",
     "updatedAt": "2026-01-19T16:25:56.919Z",
     "path": "/brand/utility",
-    "logo": "/uploads/brands/1774538228575-275002850.png",
+    "logo": "/uploads/brands/1778779366813-87870800.png",
     "models": [
       {
         "id": 29,
@@ -210,8 +210,14 @@ export default function GolfCartBuilder() {
         if (product.imageFour) images.push(product.imageFour);
       });
     });
-    return images.filter(Boolean).toReversed();
-  }, [selections.items]);
+    const selected = images.filter(Boolean).toReversed();
+    if (selected.length > 0) return selected;
+
+    // Nothing selected — fall back to first product of first category
+    const firstProduct = Object.values(groupedProducts)[0]?.[0];
+    if (!firstProduct) return [];
+    return [firstProduct.imageOne, firstProduct.imageTwo, firstProduct.imageThree, firstProduct.imageFour].filter(Boolean);
+  }, [selections.items, groupedProducts]);
 
   const currentImage = allImages[currentIndex];
 
@@ -232,36 +238,59 @@ export default function GolfCartBuilder() {
     return selected && String(selected.id) === String(product.id);
   };
 
-  const handleSelect = (category, product) => {
-    setSelections((prev) => {
-      const current = prev.items[category];
-      const isSame = current && String(current.id) === String(product.id);
-      const nextSelection = isSame ? null : product;
-      setSelectedProduct(nextSelection);
+  // const handleSelect = (category, product) => {
+  //   setSelections((prev) => {
+  //     const current = prev.items[category];
+  //     const isSame = current && String(current.id) === String(product.id);
+  //     const nextSelection = isSame ? null : product;
+  //     setSelectedProduct(nextSelection);
 
-      return {
-        ...prev,
-        items: {
-          ...prev.items,
-          [category]: nextSelection,
-        },
-      };
-    });
-    // Reset image index to 0 whenever a new item is selected
+  //     return {
+  //       ...prev,
+  //       items: {
+  //         ...prev.items,
+  //         [category]: nextSelection,
+  //       },
+  //     };
+  //   });
+  //   // Reset image index to 0 whenever a new item is selected
+  //   setCurrentIndex(0);
+  // };
+  const handleSelect = (category, product) => {
+    const current = selections.items[category];
+    const isSame = current && String(current.id) === String(product.id);
+    const nextSelection = isSame ? null : product;
+
+    setSelectedProduct(nextSelection);
+    setSelections((prev) => ({
+      ...prev,
+      items: {
+        ...prev.items,
+        [category]: nextSelection,
+      },
+    }));
     setCurrentIndex(0);
   };
+  const hasOutOfStockItem = Object.values(selections.items || {}).some(
+    (item) => item?.stock === 0
+  );
 
-  const handleSaveBuild = () => {
+  const handleSaveBuild = (e, specificProduct = null) => {
+    if (e) e.stopPropagation();
     const selectedProducts = [];
 
-    Object.values(selections.items).forEach((selected) => {
-      if (!selected) return;
-      if (Array.isArray(selected)) {
-        selected.forEach((item) => selectedProducts.push({ ...item, qty: 1 }));
-      } else {
-        selectedProducts.push({ ...selected, qty: 1 });
-      }
-    });
+    if (specificProduct) {
+      selectedProducts.push({ ...specificProduct, qty: 1 });
+    } else {
+      Object.values(selections.items).forEach((selected) => {
+        if (!selected) return;
+        if (Array.isArray(selected)) {
+          selected.forEach((item) => selectedProducts.push({ ...item, qty: 1 }));
+        } else {
+          selectedProducts.push({ ...selected, qty: 1 });
+        }
+      });
+    }
 
     if (selectedProducts.length === 0) {
       alert("Please select at least one option before proceeding to checkout.");
@@ -287,8 +316,31 @@ export default function GolfCartBuilder() {
     <div className="min-h-screen bg-white text-gray-800 font-sans pt-8 pb-20">
       {/* Header */}
       <div className="container mx-auto px-6 mb-8">
-        <div className="flex items-center gap-4 text-xs md:text-sm tracking-widest text-gray-500 mb-2">
-          <span className="text-[#f9c821]">HOME</span> / {brand?.name?.toUpperCase() || "LOADING..."}
+        <div className="flex items-center flex-wrap gap-1 text-xs md:text-sm tracking-widest text-gray-500 mb-2">
+          <span
+            className="text-[#f9c821] cursor-pointer hover:underline"
+            onClick={() => navigate("/")}
+          >
+            HOME
+          </span>
+          {brand?.name && (
+            <>
+              <span className="mx-1">/</span>
+              <span className="text-gray-600 uppercase">{brand.name}</span>
+            </>
+          )}
+          {selectedModel?.name && (
+            <>
+              <span className="mx-1">/</span>
+              <span className="text-gray-600 uppercase">{selectedModel.name}</span>
+            </>
+          )}
+          {openSection && (
+            <>
+              <span className="mx-1">/</span>
+              <span className="text-gray-800 uppercase font-semibold">{openSection}</span>
+            </>
+          )}
         </div>
         <h1 className="flex items-center justify-between text-3xl md:text-5xl font-serif font-bold">
           <div className="flex items-center gap-2">
@@ -373,15 +425,17 @@ export default function GolfCartBuilder() {
               <span className="bg-[#f9c821] text-black px-5 py-3 rounded-full text-xs font-extrabold tracking-wider shadow-md uppercase">
                 Premium Series
               </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleSaveBuild}
-                  className="bg-white/95 backdrop-blur-sm border border-gray-200 px-6 py-3 rounded-full shadow-xl text-xs font-bold tracking-wider flex items-center gap-2 hover:bg-[#f9c821] hover:text-black hover:border-[#f9c821] transition-all duration-300 transform hover:-translate-y-0.5"
-                  aria-label="Save this build"
-                >
-                  <Bookmark className="w-4 h-4" /> Save Build
-                </button>
-              </div>
+              {!hasOutOfStockItem && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveBuild}
+                    className="bg-white/95 backdrop-blur-sm border border-gray-200 px-6 py-3 rounded-full shadow-xl text-xs font-bold tracking-wider flex items-center gap-2 hover:bg-[#f9c821] hover:text-black hover:border-[#f9c821] transition-all duration-300 transform hover:-translate-y-0.5"
+                    aria-label="Save this build"
+                  >
+                    <Bookmark className="w-4 h-4" /> Save Build
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="absolute bottom-8 left-8 text-black z-10">
@@ -443,7 +497,7 @@ export default function GolfCartBuilder() {
 
         {/* Right - Options */}
         <div className="lg:w-[35%]">
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             <h2 className="text-xs font-bold text-[#f9c821] mb-6 tracking-[0.2em] uppercase border-b border-gray-300 pb-4">
               Select Your Model
             </h2>
@@ -516,14 +570,15 @@ export default function GolfCartBuilder() {
                               return (
                                 <div
                                   key={product.id}
-                                  onClick={() => !isOutOfStock && handleSelect(categoryName, product)}
-                                  className={`flex items-center justify-between p-4 rounded-lg transition-all border ${
-                                    isOutOfStock
-                                      ? "bg-gray-100 border-gray-200 cursor-not-allowed opacity-60"
-                                      : active
-                                        ? "bg-[#f9c821]/10 border-[#f9c821] text-[#f9c821] cursor-pointer"
-                                        : "bg-white border-gray-200 hover:bg-gray-100 cursor-pointer"
-                                  }`}
+                                  onClick={() => handleSelect(categoryName, product)}
+                                  className={`flex items-center justify-between p-4 rounded-lg transition-all border ${isOutOfStock
+                                    ? active
+                                      ? "bg-red-50 border-red-400 cursor-pointer"
+                                      : "bg-gray-100 border-gray-200 cursor-pointer opacity-80"
+                                    : active
+                                      ? "bg-[#f9c821]/10 border-[#f9c821] text-[#f9c821] cursor-pointer"
+                                      : "bg-white border-gray-200 hover:bg-gray-100 cursor-pointer"
+                                    }`}
                                 >
                                   <div>
                                     <span className="text-base text-black font-medium">{product.name}</span>
@@ -540,7 +595,15 @@ export default function GolfCartBuilder() {
                                     <span className="text-sm font-bold">
                                       ${product.price.toFixed(2)}
                                     </span>
-                                    {active && <ArrowRight className="w-5 h-5 text-[#e7b203]" />}
+                                    {active && !isOutOfStock && (
+                                      <button
+                                        onClick={(e) => handleSaveBuild(e, product)}
+                                        className="bg-[#f9c821] text-black text-xs font-bold px-3 py-1.5 rounded hover:bg-yellow-500 transition-colors shadow-sm ml-2"
+                                      >
+                                        Save Build
+                                      </button>
+                                    )}
+                                    {active && isOutOfStock && <ArrowRight className="w-5 h-5 text-[#e7b203]" />}
                                   </div>
                                 </div>
                               );
