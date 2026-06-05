@@ -188,7 +188,7 @@ export default function GolfCartBuilder() {
         >
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200 h-[400px] lg:h-[700px] group transition-all duration-300">
             <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+              className="absolute inset-0 w-full h-full bg-contain bg-center transition-transform duration-700 group-hover:scale-105"
               style={{
                 backgroundImage: 'url("./assets/cpm_club_car.webp")',
               }}

@@ -110,9 +110,9 @@ export default function GolfCartBuilder() {
           setBrand(utilityBrand);
           setBrandLogo(utilityBrand.logo || null);
 
-          if (utilityBrand.models?.length > 0) {
-            setSelectedModel(utilityBrand.models[0]);
-          }
+          // if (utilityBrand.models?.length > 0) {
+          //   setSelectedModel(utilityBrand.models[0]);
+          // }
 
           setLoading(false);
           return; // stop further execution (no API call)
@@ -128,9 +128,9 @@ export default function GolfCartBuilder() {
           setBrandLogo(null);
         }
 
-        if (data.models?.length > 0) {
-          setSelectedModel(data.models[0]);
-        }
+        // if (data.models?.length > 0) {
+        //   setSelectedModel(data.models[0]);
+        // }
 
       } catch (error) {
         console.error("Error fetching brand:", error);
@@ -182,11 +182,12 @@ export default function GolfCartBuilder() {
           model: { name: selectedModel.name, price: selectedModel.price || 0 },
           items: {},
         });
+        // Reset selected product when model changes
+        setSelectedProduct(null);
 
         const firstCategory = Object.keys(grouped)[0];
-        const firstProduct = Object.values(grouped)[0][0];
         if (firstCategory) setOpenSection(firstCategory);
-        if (firstProduct) handleSelect(firstCategory, firstProduct);
+        // if (firstProduct) handleSelect(firstCategory, firstProduct);
 
         // console.log(grouped);
         // console.log( Object.keys(grouped)[0]);
@@ -199,25 +200,14 @@ export default function GolfCartBuilder() {
   }, [selectedModel]);
 
   const allImages = useMemo(() => {
-    const images = [];
-    Object.values(selections.items).forEach((item) => {
-      if (!item) return;
-      const products = Array.isArray(item) ? item : [item];
-      products.forEach((product) => {
-        if (product.imageOne) images.push(product.imageOne);
-        if (product.imageTwo) images.push(product.imageTwo);
-        if (product.imageThree) images.push(product.imageThree);
-        if (product.imageFour) images.push(product.imageFour);
-      });
-    });
-    const selected = images.filter(Boolean).toReversed();
-    if (selected.length > 0) return selected;
-
-    // Nothing selected — fall back to first product of first category
-    const firstProduct = Object.values(groupedProducts)[0]?.[0];
-    if (!firstProduct) return [];
-    return [firstProduct.imageOne, firstProduct.imageTwo, firstProduct.imageThree, firstProduct.imageFour].filter(Boolean);
-  }, [selections.items, groupedProducts]);
+    if (!selectedProduct) return [];
+    return [
+      selectedProduct.imageOne,
+      selectedProduct.imageTwo,
+      selectedProduct.imageThree,
+      selectedProduct.imageFour,
+    ].filter(Boolean);
+  }, [selectedProduct]);
 
   const currentImage = allImages[currentIndex];
 
@@ -238,74 +228,63 @@ export default function GolfCartBuilder() {
     return selected && String(selected.id) === String(product.id);
   };
 
-  // const handleSelect = (category, product) => {
-  //   setSelections((prev) => {
-  //     const current = prev.items[category];
-  //     const isSame = current && String(current.id) === String(product.id);
-  //     const nextSelection = isSame ? null : product;
-  //     setSelectedProduct(nextSelection);
 
-  //     return {
-  //       ...prev,
-  //       items: {
-  //         ...prev.items,
-  //         [category]: nextSelection,
-  //       },
-  //     };
-  //   });
-  //   // Reset image index to 0 whenever a new item is selected
+  // const handleSelect = (category, product) => {
+  //   const current = selections.items[category];
+  //   const isSame = current && String(current.id) === String(product.id);
+  //   const nextSelection = isSame ? null : product;
+
+  //   setSelectedProduct(nextSelection);
+  //   setSelections((prev) => ({
+  //     ...prev,
+  //     items: {
+  //       ...prev.items,
+  //       [category]: nextSelection,
+  //     },
+  //   }));
   //   setCurrentIndex(0);
   // };
   const handleSelect = (category, product) => {
-    const current = selections.items[category];
-    const isSame = current && String(current.id) === String(product.id);
-    const nextSelection = isSame ? null : product;
+    setSelections((prev) => {
+      const current = prev.items[category];
+      const isSame = current && String(current.id) === String(product.id);
 
-    setSelectedProduct(nextSelection);
-    setSelections((prev) => ({
-      ...prev,
-      items: {
-        ...prev.items,
-        [category]: nextSelection,
-      },
-    }));
+      return {
+        ...prev,
+        items: {
+          ...prev.items,
+          [category]: isSame ? null : product, // toggle single select
+        },
+      };
+    });
+
+    setSelectedProduct((prev) =>
+      prev && String(prev.id) === String(product.id) ? null : product
+    );
+
     setCurrentIndex(0);
   };
-  const hasOutOfStockItem = Object.values(selections.items || {}).some(
-    (item) => item?.stock === 0
-  );
+
+  const hasOutOfStockItem = selectedProduct?.stock === 0;
 
   const handleSaveBuild = (e, specificProduct = null) => {
     if (e) e.stopPropagation();
-    const selectedProducts = [];
 
-    if (specificProduct) {
-      selectedProducts.push({ ...specificProduct, qty: 1 });
-    } else {
-      Object.values(selections.items).forEach((selected) => {
-        if (!selected) return;
-        if (Array.isArray(selected)) {
-          selected.forEach((item) => selectedProducts.push({ ...item, qty: 1 }));
-        } else {
-          selectedProducts.push({ ...selected, qty: 1 });
-        }
-      });
-    }
+    // Jo product pass hua ya last selected — sirf wohi cart mein jayega
+    const productToAdd = specificProduct || selectedProduct;
 
-    if (selectedProducts.length === 0) {
+    if (!productToAdd) {
       alert("Please select at least one option before proceeding to checkout.");
       return;
     }
 
-    addItem(selectedProducts);
+    addItem([{ ...productToAdd, qty: 1 }]);
     navigate("/checkout");
   };
 
-  const totalPrice = (
-    (selections.model?.price || 0) +
-    Object.values(selections.items)
-      .reduce((sum, item) => sum + (item?.price || 0), 0)
-  ).toFixed(2);
+  const totalPrice = selectedProduct
+    ? parseFloat(selectedProduct.price || 0).toFixed(2)
+    : null;
 
   if (loading && !brand) {
     return <PageLoader />;
@@ -366,19 +345,25 @@ export default function GolfCartBuilder() {
         {/* Left - Image */}
         <div className="lg:w-[65%]">
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200 h-[400px] lg:h-[700px] group">
-            <div
-              className="absolute inset-0 bg-center bg-no-repeat"
-              style={{
-                backgroundImage: `url(https://api.clubpromfg.com/uploads/products/${currentImage || "placeholder.jpg"})`,
-                backgroundSize: "80%",
-                backgroundPosition: "center",
-              }}
-              role="img"
-              aria-label="Selected golf cart configuration preview"
-            ></div>
-
-            {/* Sold Out overlay when selected product is out of stock */}
-            {selectedProduct?.stock === 0 && (
+            {allImages.length > 0 ? (
+              <div
+                className="absolute inset-0 flex items-center justify-center p-10"
+                role="img"
+                aria-label="Selected golf cart configuration preview"
+              >
+                <img
+                  src={`https://api.clubpromfg.com/uploads/products/${currentImage}`}
+                  alt="Product preview"
+                  className="max-h-full max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-2xl text-gray-500">
+                Select a product to see preview
+              </div>
+            )}
+            {/* Sold Out overlay — only when a product IS selected and it's out of stock */}
+            {allImages.length > 0 && selectedProduct?.stock === 0 && (
               <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
                 <span className="bg-red-600 text-white text-3xl font-bold px-10 py-4 rounded-lg rotate-[-15deg] shadow-lg tracking-widest">
                   SOLD OUT
@@ -440,57 +425,56 @@ export default function GolfCartBuilder() {
 
             <div className="absolute bottom-8 left-8 text-black z-10">
               <p className="text-2xl lg:text-4xl font-bold tracking-tight mb-2">
-                {selectedModel?.name || "Select a Model"}
+                {selectedModel?.name || ""}
               </p>
-              <p className="text-4xl lg:text-6xl font-serif tracking-tight">${totalPrice}</p>
+              <p className="text-4xl lg:text-6xl font-serif tracking-tight">{totalPrice != 0 && totalPrice !== undefined && totalPrice !== null ? `$${totalPrice}` : ""}</p>
             </div>
           </div>
-          <div className="pt-10">
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6 shadow-sm space-y-4">
-
-              {/* Header */}
-              <div className="flex items-center gap-2">
-                {/* <span className="h-1.5 w-1.5 rounded-full bg-primary" /> */}
-                <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                  Product Name
-                </h2>
-              </div>
-
-              {/* Product Name */}
-              {selectedProduct?.name ? (
-                <p
-                  className="text-base lg:text-lg font-medium text-gray-800"
-                  dangerouslySetInnerHTML={{ __html: selectedProduct.name }}
-                />
-              ) : (
-                <div className="h-4 w-40 rounded bg-gray-200 animate-pulse" />
-              )}
-
-              {/* Divider */}
-              <div className="h-px w-full bg-gray-100" />
-
-              <div className="flex items-center gap-2">
-                {/* <span className="h-1.5 w-1.5 rounded-full bg-primary" /> */}
-                <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
-                  Product Description
-                </h2>
-              </div>
-              {/* Description */}
-              {selectedProduct?.description ? (
-                <p
-                  className="text-sm lg:text-base text-gray-600 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: selectedProduct.description }}
-                />
-              ) : (
-                <div className="space-y-2">
-                  <div className="h-3 w-full rounded bg-gray-200 animate-pulse" />
-                  <div className="h-3 w-4/5 rounded bg-gray-200 animate-pulse" />
-                  <div className="h-3 w-3/5 rounded bg-gray-200 animate-pulse" />
+          {selectedProduct && (
+            <div className="pt-10">
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 lg:p-6 shadow-sm space-y-4">
+                {/* Product Name */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
+                    Product Name
+                  </h2>
                 </div>
-              )}
 
+                {selectedProduct?.name ? (
+                  <p
+                    className="text-base lg:text-lg font-medium text-gray-800"
+                    dangerouslySetInnerHTML={{ __html: selectedProduct.name }}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No product name available.
+                  </p>
+                )}
+
+                <div className="h-px w-full bg-gray-100 my-4" />
+
+                {/* Product Description */}
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg lg:text-xl font-semibold text-gray-900">
+                    Product Description
+                  </h2>
+                </div>
+
+                {selectedProduct?.description ? (
+                  <p
+                    className="text-sm lg:text-base text-gray-600 leading-relaxed"
+                    dangerouslySetInnerHTML={{
+                      __html: selectedProduct.description,
+                    }}
+                  />
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No product description available.
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
 
         </div>
@@ -603,7 +587,7 @@ export default function GolfCartBuilder() {
                                         Save Build
                                       </button>
                                     )}
-                                    {active && isOutOfStock && <ArrowRight className="w-5 h-5 text-[#e7b203]" />}
+                                    {/* {active && !isOutOfStock && <ArrowRight className="w-5 h-5 text-[#e7b203]" />} */}
                                   </div>
                                 </div>
                               );

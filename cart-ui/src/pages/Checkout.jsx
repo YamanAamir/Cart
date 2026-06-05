@@ -82,7 +82,7 @@ export default function Checkout() {
         <div className="lg:w-[65%]">
           <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-200 h-[400px] lg:h-[700px] group transition-all duration-300">
             <div
-              className="absolute inset-0 w-full h-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+              className="absolute inset-0 w-full h-full bg-contain bg-center bg-no-repeat transition-transform duration-700  p-6"
               style={{ backgroundImage: `url(${cardImg})` }}
             >
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -220,11 +220,10 @@ export default function Checkout() {
               <button
                 onClick={handleStripeCheckout}
                 disabled={items.length === 0}
-                className={`w-full font-bold text-sm tracking-[0.2em] py-5 rounded-xl uppercase flex items-center justify-center gap-3 transition-all ${
-                  items.length === 0
+                className={`w-full font-bold text-sm tracking-[0.2em] py-5 rounded-xl uppercase flex items-center justify-center gap-3 transition-all ${items.length === 0
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[#f9c821] hover:bg-[#e0b318] text-white shadow-lg shadow-[#f9c821]/30 hover:scale-[1.02] active:scale-98"
-                }`}
+                  }`}
               >
                 Check Out <ArrowRight className="w-5 h-5" />
               </button>
